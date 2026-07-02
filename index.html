@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>THATdudeAGAIN'z Tools — free browser utilities</title>
+<meta name="description" content="THATdudeAGAIN'z Tools — small, fast, free utilities that run right in your browser. Unit converter, tip calculator, word counter, and more." />
+<style>
+  /* ============================================================
+     EDIT ME: Brand colors. Change these to re-skin the whole site.
+     ============================================================ */
+  :root {
+    --bg:        #0e0e14;
+    --surface:   #17171f;
+    --text:      #f4f4f8;
+    --muted:     #a0a0b0;
+    --pink:      #ff2e88;
+    --purple:    #9b5cff;
+    --cyan:      #21e6c1;
+    --yellow:    #ffd23f;
+    --orange:    #ff6b35;
+    --ring:      rgba(255,255,255,.12);
+    --grad: linear-gradient(120deg, var(--pink), var(--purple) 45%, var(--cyan));
+    --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color-scheme: dark; /* native date pickers & scrollbars match the dark theme */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font);
+    line-height: 1.6;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  section { padding: 6rem 1.5rem; max-width: 1100px; margin: 0 auto; }
+  .eyebrow {
+    display: inline-block;
+    font-size: .8rem;
+    font-weight: 700;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1rem;
+  }
+  h2 { font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 800; line-height: 1.1; letter-spacing: -.02em; }
+  .grad-text {
+    background: var(--grad);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  /* ---------- Animated background blobs ---------- */
+  .blob {
+    position: fixed;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .35;
+    z-index: -1;
+    animation: float 16s ease-in-out infinite;
+  }
+  .blob.b1 { width: 420px; height: 420px; background: var(--pink);   top: -120px; left: -100px; }
+  .blob.b2 { width: 380px; height: 380px; background: var(--cyan);   top: 40%; right: -140px; animation-delay: -5s; }
+  .blob.b3 { width: 340px; height: 340px; background: var(--purple); bottom: -120px; left: 30%; animation-delay: -9s; }
+  @keyframes float {
+    0%,100% { transform: translate(0,0) scale(1); }
+    50%     { transform: translate(30px,-40px) scale(1.12); }
+  }
+
+  /* ---------- Cursor FX canvas ---------- */
+  #fx {
+    position: fixed; inset: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 40;
+  }
+
+  /* ---------- Nav ---------- */
+  header {
+    position: sticky; top: 0; z-index: 50;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 1rem 1.5rem;
+    max-width: 1100px; margin: 0 auto;
+    backdrop-filter: blur(10px);
+  }
+  .logo { font-weight: 900; font-size: 1.25rem; letter-spacing: -.03em; }
+  .logo span { color: var(--pink); }
+  nav ul { display: flex; gap: 1.75rem; list-style: none; font-weight: 600; font-size: .95rem; }
+  nav a { position: relative; color: var(--muted); transition: color .2s; }
+  nav a:hover { color: var(--text); }
+  nav a::after {
+    content: ""; position: absolute; left: 0; bottom: -4px; height: 2px; width: 0;
+    background: var(--grad); transition: width .25s;
+  }
+  nav a:hover::after { width: 100%; }
+  .nav-toggle { display: none; background: none; border: none; color: var(--text); font-size: 1.6rem; cursor: pointer; }
+
+  /* ---------- Hero ---------- */
+  .hero { padding-top: 5rem; padding-bottom: 4rem; text-align: left; }
+  .hero h1 {
+    font-size: clamp(2.8rem, 9vw, 6rem);
+    font-weight: 900;
+    line-height: .98;
+    letter-spacing: -.04em;
+    margin-bottom: 1.25rem;
+  }
+  .hero p.lead { font-size: clamp(1.1rem, 2.5vw, 1.5rem); color: var(--muted); max-width: 620px; margin-bottom: 2.25rem; }
+  .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .9rem 1.6rem; border-radius: 999px; font-weight: 700; font-size: 1rem;
+    cursor: pointer; border: 2px solid transparent; transition: transform .15s, box-shadow .2s;
+  }
+  .btn-primary { background: var(--grad); color: #0e0e14; box-shadow: 0 8px 30px rgba(255,46,136,.35); }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 14px 40px rgba(155,92,255,.45); }
+  .btn-ghost { border-color: var(--ring); color: var(--text); }
+  .btn-ghost:hover { border-color: var(--cyan); transform: translateY(-3px); }
+
+  /* marquee of skills */
+  .marquee { margin-top: 4rem; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+  .marquee ul { display: flex; gap: 3rem; list-style: none; white-space: nowrap; animation: scroll 22s linear infinite; }
+  .marquee li { font-weight: 800; font-size: 1.4rem; color: var(--muted); letter-spacing: -.01em; }
+  .marquee li:nth-child(3n) { color: var(--yellow); }
+  .marquee li:nth-child(3n+1) { color: var(--cyan); }
+  @keyframes scroll { to { transform: translateX(-50%); } }
+
+  /* ---------- About ---------- */
+  .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; align-items: center; }
+  .about-card {
+    background: var(--surface); border: 1px solid var(--ring); border-radius: 24px;
+    padding: 2rem; aspect-ratio: 1; display: grid; place-items: center;
+    background-image: var(--grad); position: relative; overflow: hidden;
+  }
+  .about-card .initials { font-size: clamp(4rem, 12vw, 8rem); font-weight: 900; color: rgba(14,14,20,.85); letter-spacing: -.05em; }
+  .about p { color: var(--muted); font-size: 1.1rem; margin-top: 1rem; }
+  .stats { display: flex; gap: 2rem; margin-top: 2rem; flex-wrap: wrap; }
+  .stat b { display: block; font-size: 2.2rem; font-weight: 900; }
+  .stat span { color: var(--muted); font-size: .9rem; }
+
+  /* ---------- Projects ---------- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; margin-top: 3rem; }
+  .card {
+    background: var(--surface); border: 1px solid var(--ring); border-radius: 20px; padding: 1.75rem;
+    transition: transform .25s, border-color .25s; position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .25s;
+    background: linear-gradient(135deg, rgba(255,46,136,.12), rgba(33,230,193,.12));
+  }
+  .card:hover { transform: translateY(-6px); border-color: transparent; }
+  .card:hover::before { opacity: 1; }
+  .card .tag { display: inline-block; font-size: .75rem; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--cyan); margin-bottom: .75rem; }
+  .card h3 { font-size: 1.4rem; font-weight: 800; margin-bottom: .5rem; position: relative; }
+  .card p { color: var(--muted); position: relative; }
+  .card .arrow { margin-top: 1.25rem; font-weight: 700; color: var(--pink); position: relative; }
+  .card::before { pointer-events: none; }
+
+  /* ---------- Tool UIs inside cards ---------- */
+  .tool-ui { margin-top: 1.1rem; position: relative; }
+  .tool-ui .row { display: flex; gap: .6rem; align-items: flex-end; }
+  .tool-ui .row > * { flex: 1; min-width: 0; }
+  .tool-ui input, .tool-ui select, .tool-ui textarea {
+    width: 100%; padding: .7rem .8rem; border-radius: 12px; font: inherit; font-size: .95rem;
+    background: var(--bg); color: var(--text); border: 1px solid var(--ring);
+    transition: border-color .2s, box-shadow .2s; margin-bottom: .6rem;
+  }
+  .tool-ui input:focus, .tool-ui select:focus, .tool-ui textarea:focus {
+    outline: none; border-color: var(--cyan); box-shadow: 0 0 0 3px rgba(33,230,193,.18);
+  }
+  .tool-ui label {
+    display: block; font-size: .72rem; font-weight: 700; letter-spacing: .08em;
+    text-transform: uppercase; color: var(--muted); margin-bottom: .35rem;
+  }
+  .tool-ui textarea { min-height: 110px; resize: vertical; }
+  .result {
+    margin-top: .4rem; padding: .85rem 1rem; border-radius: 12px; font-weight: 800; font-size: 1.15rem;
+    background: rgba(33,230,193,.1); border: 1px solid rgba(33,230,193,.25); color: var(--cyan);
+    overflow-wrap: break-word;
+  }
+  .result small { display: block; font-size: .72rem; font-weight: 600; color: var(--muted); letter-spacing: .04em; }
+  .mini-btns { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .4rem; }
+  .mini-btn {
+    padding: .5rem .9rem; border-radius: 999px; border: 1px solid var(--ring); background: none;
+    color: var(--text); font: inherit; font-size: .8rem; font-weight: 700; cursor: pointer;
+    transition: border-color .2s, color .2s, transform .15s;
+  }
+  .mini-btn:hover { border-color: var(--pink); color: var(--pink); transform: translateY(-2px); }
+  .swap-btn {
+    flex: 0 0 auto; width: 2.6rem; height: 2.6rem; border-radius: 50%; border: 1px solid var(--ring);
+    background: none; color: var(--cyan); font-size: 1.1rem; cursor: pointer; margin-bottom: .6rem;
+  }
+  .swap-btn:hover { border-color: var(--cyan); }
+  .counts { display: flex; gap: 1.4rem; flex-wrap: wrap; margin: .4rem 0 .6rem; }
+  .counts div b { display: block; font-size: 1.4rem; font-weight: 900; }
+  .counts div span { color: var(--muted); font-size: .78rem; }
+
+  /* ---------- Contact ---------- */
+  .contact { text-align: center; }
+  .contact h2 { margin-bottom: 1rem; }
+  .contact p { color: var(--muted); font-size: 1.15rem; max-width: 520px; margin: 0 auto 2rem; }
+  .socials { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+  .socials a {
+    padding: .7rem 1.3rem; border-radius: 999px; border: 1px solid var(--ring); font-weight: 600;
+    transition: transform .15s, border-color .2s, color .2s;
+  }
+  .socials a:hover { transform: translateY(-3px); border-color: var(--pink); color: var(--pink); }
+
+  /* ---------- Contact form ---------- */
+  .contact-form {
+    max-width: 560px; margin: 2.5rem auto 0; text-align: left;
+    background: var(--surface); border: 1px solid var(--ring); border-radius: 24px;
+    padding: 2rem; position: relative; overflow: hidden;
+  }
+  .contact-form::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 4px; background: var(--grad);
+  }
+  .field { margin-bottom: 1.25rem; }
+  .field label { display: block; font-weight: 700; font-size: .85rem; letter-spacing: .04em; margin-bottom: .5rem; }
+  .field input, .field textarea {
+    width: 100%; padding: .9rem 1rem; border-radius: 12px; font: inherit; font-size: 1rem;
+    background: var(--bg); color: var(--text); border: 1px solid var(--ring); transition: border-color .2s, box-shadow .2s;
+  }
+  .field textarea { resize: vertical; min-height: 130px; }
+  .field input:focus, .field textarea:focus {
+    outline: none; border-color: var(--pink); box-shadow: 0 0 0 3px rgba(255,46,136,.2);
+  }
+  .contact-form .btn-primary { width: 100%; justify-content: center; border: none; }
+  .form-note { font-size: .85rem; color: var(--muted); margin-top: 1rem; text-align: center; }
+  .form-status {
+    display: none; margin-top: 1.25rem; padding: .9rem 1rem; border-radius: 12px; font-weight: 600;
+    text-align: center;
+  }
+  .form-status.show { display: block; }
+  .form-status.ok  { background: rgba(33,230,193,.14); color: var(--cyan); border: 1px solid rgba(33,230,193,.3); }
+  .form-status.err { background: rgba(255,46,136,.14); color: var(--pink); border: 1px solid rgba(255,46,136,.3); }
+
+  footer { text-align: center; padding: 2.5rem 1.5rem; color: var(--muted); font-size: .9rem; border-top: 1px solid var(--ring); }
+
+  /* ---------- Reveal on scroll ---------- */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.in { opacity: 1; transform: none; }
+
+  /* ---------- Responsive ---------- */
+  @media (max-width: 720px) {
+    nav ul { display: none; }
+    .nav-toggle { display: block; }
+    .about-grid { grid-template-columns: 1fr; }
+    section { padding: 4rem 1.25rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; scroll-behavior: auto; }
+    .reveal { opacity: 1; transform: none; }
+  }
+</style>
+</head>
+<body>
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+
+  <!-- Colorful cursor smoke + click sparkles render here -->
+  <canvas id="fx" aria-hidden="true"></canvas>
+
+  <header>
+    <!-- EDIT ME: your name/logo -->
+    <div class="logo">THATdude<span>AGAIN'z</span></div>
+    <nav>
+      <ul>
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#about">About</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <button class="nav-toggle" aria-label="Menu">☰</button>
+  </header>
+
+  <!-- ================= HERO ================= -->
+  <section class="hero">
+    <span class="eyebrow">🛠️ Welcome to</span>
+    <!-- EDIT ME -->
+    <h1>THATdudeAGAIN'z<br><span class="grad-text">toolbox.</span></h1>
+    <p class="lead">Small, fast, free utilities that run right in your browser. No ads, no sign-ups, no nonsense — just tools that work.</p>
+    <div class="cta-row">
+      <a href="#tools" class="btn btn-primary">Use the tools →</a>
+      <a href="#contact" class="btn btn-ghost">Request a tool</a>
+    </div>
+
+    <div class="marquee" aria-hidden="true">
+      <ul>
+        <li>Convert</li><li>•</li><li>Calculate</li><li>•</li><li>Count</li><li>•</li><li>Generate</li><li>•</li><li>Free forever</li><li>•</li>
+        <li>Convert</li><li>•</li><li>Calculate</li><li>•</li><li>Count</li><li>•</li><li>Generate</li><li>•</li><li>Free forever</li><li>•</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about" class="about reveal">
+    <div class="about-grid">
+      <div class="about-card"><span class="initials">TDA</span></div>
+      <div>
+        <span class="eyebrow">About this site</span>
+        <h2>Everyday tools, <span class="grad-text">zero friction.</span></h2>
+        <p>Built by THATdudeAGAIN'z — a maker with a love for strong type, punchy color, and tools that feel alive. Everything here runs 100% in your browser: nothing is uploaded, nothing is tracked, and it even works offline once the page loads.</p>
+        <div class="stats">
+          <div class="stat"><b class="grad-text">4</b><span>Tools live (more coming)</span></div>
+          <div class="stat"><b class="grad-text">0</b><span>Ads &amp; sign-ups</span></div>
+          <div class="stat"><b class="grad-text">100%</b><span>Free, in your browser</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TOOLS ================= -->
+  <section id="tools" class="reveal">
+    <span class="eyebrow">The tools</span>
+    <h2>Pick One and <span class="grad-text">Get er Done!</span></h2>
+    <div class="cards">
+
+      <!-- ---- Unit converter ---- -->
+      <article class="card">
+        <span class="tag">Convert</span>
+        <h3>Unit Converter</h3>
+        <p>Inches to feet, miles to km, °F to °C — pick a category and go.</p>
+        <div class="tool-ui">
+          <label for="uc-cat">Category</label>
+          <select id="uc-cat">
+            <option value="length" selected>Length</option>
+            <option value="weight">Weight</option>
+            <option value="temperature">Temperature</option>
+            <option value="speed">Speed</option>
+          </select>
+          <label for="uc-value">Amount</label>
+          <input type="number" id="uc-value" value="1" step="any" inputmode="decimal" />
+          <div class="row">
+            <div>
+              <label for="uc-from">From</label>
+              <select id="uc-from"></select>
+            </div>
+            <button class="swap-btn" id="uc-swap" type="button" title="Swap units" aria-label="Swap units">⇄</button>
+            <div>
+              <label for="uc-to">To</label>
+              <select id="uc-to"></select>
+            </div>
+          </div>
+          <div class="result" id="uc-result" aria-live="polite"><small>Result</small>—</div>
+        </div>
+      </article>
+
+      <!-- ---- Tip & percentage calculator ---- -->
+      <article class="card">
+        <span class="tag">Calculate</span>
+        <h3>Tip &amp; Percentage</h3>
+        <p>Split the bill fairly, or answer "what's X% of Y?" in one keystroke.</p>
+        <div class="tool-ui">
+          <label for="tip-bill">Bill amount</label>
+          <input type="number" id="tip-bill" placeholder="50.00" step="any" min="0" inputmode="decimal" />
+          <div class="row">
+            <div>
+              <label for="tip-pct">Tip %</label>
+              <input type="number" id="tip-pct" value="15" step="any" min="0" inputmode="decimal" />
+            </div>
+            <div>
+              <label for="tip-split">Split between</label>
+              <input type="number" id="tip-split" value="1" min="1" step="1" inputmode="numeric" />
+            </div>
+          </div>
+          <div class="result" id="tip-result" aria-live="polite"><small>Tip · Total · Each pays</small>—</div>
+          <label for="pct-x" style="margin-top:.9rem">Quick percentage</label>
+          <div class="row">
+            <div><input type="number" id="pct-x" placeholder="15" step="any" inputmode="decimal" aria-label="Percent" /></div>
+            <div style="flex:0 0 auto; color:var(--muted); font-weight:700; margin-bottom:.6rem">% of</div>
+            <div><input type="number" id="pct-y" placeholder="200" step="any" inputmode="decimal" aria-label="Of amount" /></div>
+          </div>
+          <div class="result" id="pct-result" aria-live="polite"><small>Answer</small>—</div>
+        </div>
+      </article>
+
+      <!-- ---- Word counter & case converter ---- -->
+      <article class="card">
+        <span class="tag">Text</span>
+        <h3>Word Counter &amp; Case</h3>
+        <p>Live word and character counts, plus one-tap case conversion.</p>
+        <div class="tool-ui">
+          <label for="wc-text">Your text</label>
+          <textarea id="wc-text" placeholder="Paste or type here..."></textarea>
+          <div class="counts">
+            <div><b class="grad-text" id="wc-words">0</b><span>words</span></div>
+            <div><b class="grad-text" id="wc-chars">0</b><span>characters</span></div>
+            <div><b class="grad-text" id="wc-nospace">0</b><span>no spaces</span></div>
+          </div>
+          <div class="mini-btns">
+            <button class="mini-btn" type="button" data-case="upper">UPPER</button>
+            <button class="mini-btn" type="button" data-case="lower">lower</button>
+            <button class="mini-btn" type="button" data-case="title">Title Case</button>
+            <button class="mini-btn" type="button" data-case="sentence">Sentence case</button>
+            <button class="mini-btn" type="button" id="wc-copy">📋 Copy</button>
+          </div>
+        </div>
+      </article>
+
+      <!-- ---- Age & date calculator ---- -->
+      <article class="card">
+        <span class="tag">Dates</span>
+        <h3>Age &amp; Date Calculator</h3>
+        <p>How old exactly? How many days between? What date is 90 days out?</p>
+        <div class="tool-ui">
+          <label for="age-dob">Birthdate</label>
+          <input type="date" id="age-dob" />
+          <div class="result" id="age-result" aria-live="polite"><small>Age</small>—</div>
+
+          <label for="dbd-a" style="margin-top:.9rem">Days between two dates</label>
+          <div class="row">
+            <div><input type="date" id="dbd-a" aria-label="First date" /></div>
+            <div style="flex:0 0 auto; color:var(--muted); font-weight:700; margin-bottom:.6rem">→</div>
+            <div><input type="date" id="dbd-b" aria-label="Second date" /></div>
+          </div>
+          <div class="result" id="dbd-result" aria-live="polite"><small>Difference</small>—</div>
+
+          <label for="dadd-date" style="margin-top:.9rem">Add or subtract days</label>
+          <div class="row">
+            <div><input type="date" id="dadd-date" aria-label="Start date" /></div>
+            <div><input type="number" id="dadd-days" placeholder="90 or -30" step="1" inputmode="numeric" aria-label="Days to add, negative to subtract" /></div>
+          </div>
+          <div class="result" id="dadd-result" aria-live="polite"><small>Lands on</small>—</div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= CONTACT ================= -->
+  <section id="contact" class="contact reveal">
+    <span class="eyebrow">Let's talk</span>
+    <h2>Want a tool that doesn't exist yet?</h2>
+    <p>Tell me what it should do and I'll add it to the toolbox. Bug reports and wild ideas welcome too.</p>
+
+    <!-- ============================================================
+         CONTACT FORM
+         Works out of the box: on submit it opens the guest's email
+         app with a pre-filled message to you (no backend needed).
+
+         WANT SUBMISSIONS IN YOUR INBOX INSTEAD (no email app popup)?
+         1. Sign up free at https://formspree.io and create a form.
+         2. Set data-mode="formspree" below.
+         3. Replace YOUR_FORM_ID with your Formspree form ID.
+         ============================================================ -->
+    <form class="contact-form" id="contactForm"
+          data-mode="formspree"
+          data-email="jwclarkladymae@gmail.com"
+          action="https://formspree.io/f/xvzjwdro" method="POST">
+      <div class="field">
+        <label for="cf-name">Your name</label>
+        <input type="text" id="cf-name" name="name" placeholder="Jane Guest" required />
+      </div>
+      <div class="field">
+        <label for="cf-email">Your email</label>
+        <input type="email" id="cf-email" name="email" placeholder="jane@example.com" required />
+      </div>
+      <div class="field">
+        <label for="cf-message">Message</label>
+        <textarea id="cf-message" name="message" placeholder="Describe the tool you wish existed..." required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Send message →</button>
+      <div class="form-status" id="formStatus" role="status"></div>
+      <p class="form-note">Prefer email? <a href="mailto:jwclarkladymae@gmail.com" style="color:var(--cyan)">jwclarkladymae@gmail.com</a></p>
+    </form>
+
+    <!-- EDIT ME: your links -->
+    <div class="socials" style="margin-top:2.5rem">
+      <a href="#">Twitter / X</a>
+      <a href="#">LinkedIn</a>
+      <a href="#">GitHub</a>
+      <a href="#">Dribbble</a>
+    </div>
+  </section>
+
+  <footer>
+    © <span id="year"></span> THATdudeAGAIN'z. Designed &amp; built with 🎨 and code.
+  </footer>
+
+  <script>
+    // current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // mobile nav toggle
+    document.querySelector('.nav-toggle').addEventListener('click', () => {
+      const ul = document.querySelector('nav ul');
+      ul.style.display = ul.style.display === 'flex' ? 'none' : 'flex';
+      ul.style.flexDirection = 'column';
+      ul.style.position = 'absolute';
+      ul.style.top = '4rem';
+      ul.style.right = '1.5rem';
+      ul.style.background = 'var(--surface)';
+      ul.style.padding = '1rem 1.5rem';
+      ul.style.borderRadius = '16px';
+      ul.style.border = '1px solid var(--ring)';
+    });
+
+    // reveal on scroll
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: .15 });
+    document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+    // ---------- TOOL 1: unit converter ----------
+    const UNITS = {
+      length: { mm: .001, cm: .01, m: 1, km: 1000, in: .0254, ft: .3048, yd: .9144, mi: 1609.344 },
+      weight: { g: .001, kg: 1, oz: .028349523125, lb: .45359237, st: 6.35029318 },
+      speed:  { 'm/s': 1, 'km/h': 1 / 3.6, 'mph': .44704, 'knots': .514444 },
+      temperature: { '°C': 1, '°F': 1, 'K': 1 } // converted via formulas below
+    };
+    const UC_DEFAULTS = { length: ['in', 'ft'], weight: ['lb', 'kg'], speed: ['mph', 'km/h'], temperature: ['°F', '°C'] };
+
+    const ucCat = document.getElementById('uc-cat');
+    const ucValue = document.getElementById('uc-value');
+    const ucFrom = document.getElementById('uc-from');
+    const ucTo = document.getElementById('uc-to');
+    const ucResult = document.getElementById('uc-result');
+
+    function ucFill() {
+      const names = Object.keys(UNITS[ucCat.value]);
+      const [defFrom, defTo] = UC_DEFAULTS[ucCat.value];
+      for (const sel of [ucFrom, ucTo]) {
+        sel.innerHTML = names.map(n => `<option value="${n}">${n}</option>`).join('');
+      }
+      ucFrom.value = defFrom; ucTo.value = defTo;
+      ucConvert();
+    }
+
+    const toC   = (v, u) => u === '°F' ? (v - 32) * 5 / 9 : u === 'K' ? v - 273.15 : v;
+    const fromC = (v, u) => u === '°F' ? v * 9 / 5 + 32   : u === 'K' ? v + 273.15 : v;
+    const nice  = n => Number(n.toPrecision(10)).toLocaleString('en-US', { maximumFractionDigits: 6 });
+
+    function ucConvert() {
+      const v = parseFloat(ucValue.value);
+      if (!isFinite(v)) { ucResult.innerHTML = '<small>Result</small>—'; return; }
+      const cat = ucCat.value;
+      const out = cat === 'temperature'
+        ? fromC(toC(v, ucFrom.value), ucTo.value)
+        : v * UNITS[cat][ucFrom.value] / UNITS[cat][ucTo.value];
+      ucResult.innerHTML = `<small>Result</small>${nice(v)} ${ucFrom.value} = ${nice(out)} ${ucTo.value}`;
+    }
+
+    ucCat.addEventListener('change', ucFill);
+    [ucValue, ucFrom, ucTo].forEach(el => el.addEventListener('input', ucConvert));
+    document.getElementById('uc-swap').addEventListener('click', () => {
+      const t = ucFrom.value; ucFrom.value = ucTo.value; ucTo.value = t;
+      ucConvert();
+    });
+    ucFill();
+
+    // ---------- TOOL 2: tip & percentage ----------
+    const tipBill = document.getElementById('tip-bill');
+    const tipPct = document.getElementById('tip-pct');
+    const tipSplit = document.getElementById('tip-split');
+    const tipResult = document.getElementById('tip-result');
+    const money = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+
+    function tipCalc() {
+      const bill = parseFloat(tipBill.value);
+      const pct = parseFloat(tipPct.value);
+      const split = Math.max(1, parseInt(tipSplit.value) || 1);
+      if (!isFinite(bill) || !isFinite(pct) || bill < 0 || pct < 0) {
+        tipResult.innerHTML = '<small>Tip · Total · Each pays</small>—'; return;
+      }
+      const tip = bill * pct / 100, total = bill + tip;
+      tipResult.innerHTML = `<small>Tip · Total · Each pays</small>${money(tip)} · ${money(total)} · ${money(total / split)}`;
+    }
+    [tipBill, tipPct, tipSplit].forEach(el => el.addEventListener('input', tipCalc));
+
+    const pctX = document.getElementById('pct-x');
+    const pctY = document.getElementById('pct-y');
+    const pctResult = document.getElementById('pct-result');
+    function pctCalc() {
+      const x = parseFloat(pctX.value), y = parseFloat(pctY.value);
+      if (!isFinite(x) || !isFinite(y)) { pctResult.innerHTML = '<small>Answer</small>—'; return; }
+      pctResult.innerHTML = `<small>Answer</small>${nice(x)}% of ${nice(y)} = ${nice(x / 100 * y)}`;
+    }
+    [pctX, pctY].forEach(el => el.addEventListener('input', pctCalc));
+
+    // ---------- TOOL 3: word counter & case converter ----------
+    const wcText = document.getElementById('wc-text');
+    function wcCount() {
+      const t = wcText.value;
+      document.getElementById('wc-words').textContent = t.trim() ? t.trim().split(/\s+/).length : 0;
+      document.getElementById('wc-chars').textContent = t.length;
+      document.getElementById('wc-nospace').textContent = t.replace(/\s/g, '').length;
+    }
+    wcText.addEventListener('input', wcCount);
+
+    const CASES = {
+      upper: t => t.toUpperCase(),
+      lower: t => t.toLowerCase(),
+      title: t => t.toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase()),
+      sentence: t => t.toLowerCase().replace(/(^\s*\S|[.!?]\s+\S)/g, c => c.toUpperCase())
+    };
+    document.querySelectorAll('[data-case]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        wcText.value = CASES[btn.dataset.case](wcText.value);
+        wcCount();
+      });
+    });
+    document.getElementById('wc-copy').addEventListener('click', async (e) => {
+      try {
+        await navigator.clipboard.writeText(wcText.value);
+        e.target.textContent = '✅ Copied!';
+      } catch {
+        wcText.select(); document.execCommand('copy');
+        e.target.textContent = '✅ Copied!';
+      }
+      setTimeout(() => { e.target.textContent = '📋 Copy'; }, 1500);
+    });
+
+    // ---------- TOOL 4: age & date calculator ----------
+    // Parse yyyy-mm-dd as a LOCAL date. new Date('yyyy-mm-dd') is treated as
+    // UTC midnight and shifts a day in western timezones — never use it here.
+    const parseYMD = s => {
+      if (!s) return null;
+      const [y, m, d] = s.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setFullYear(y); // the multi-arg constructor remaps years 0-99 to 1900-1999
+      return dt;
+    };
+    // Whole days via UTC timestamps — immune to DST (a local-ms diff across a
+    // DST change is off by an hour and floors to the wrong day). Built via
+    // setUTCFullYear because Date.UTC also remaps years 0-99 to 1900-1999.
+    const dayNum = d => {
+      const u = new Date(Date.UTC(2000, d.getMonth(), d.getDate()));
+      u.setUTCFullYear(d.getFullYear());
+      return u.getTime() / 86400000;
+    };
+    const longDate = d => d.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    const plural = (n, w) => `${n.toLocaleString('en-US')} ${w}${n === 1 ? '' : 's'}`;
+
+    // Years + months + days-since-last-monthly-anniversary, with the anniversary
+    // day clamped to the target month's length (so a Jan 31 birthdate anchors to
+    // Feb 28/29, never producing negative days).
+    function ageParts(b, today) {
+      let y = today.getFullYear() - b.getFullYear();
+      let m = today.getMonth() - b.getMonth();
+      if (today.getDate() < b.getDate()) m--;
+      if (m < 0) { y--; m += 12; }
+      const lastOfAnchorMonth = new Date(b.getFullYear() + y, b.getMonth() + m + 1, 0).getDate();
+      const anchor = new Date(b.getFullYear() + y, b.getMonth() + m, Math.min(b.getDate(), lastOfAnchorMonth));
+      return { y, m, d: dayNum(today) - dayNum(anchor) };
+    }
+
+    const ageDob = document.getElementById('age-dob');
+    const ageResult = document.getElementById('age-result');
+    function ageCalc() {
+      const b = parseYMD(ageDob.value);
+      if (!b) { ageResult.innerHTML = '<small>Age</small>—'; return; }
+      const now = new Date();
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      if (b > today) { ageResult.innerHTML = '<small>Age</small>That birthdate is in the future 🔮'; return; }
+      const { y, m, d } = ageParts(b, today);
+      const total = dayNum(today) - dayNum(b);
+      const isBday = b.getMonth() === today.getMonth() && b.getDate() === today.getDate();
+      let nb = new Date(today.getFullYear(), b.getMonth(), b.getDate());
+      if (nb <= today) nb = new Date(today.getFullYear() + 1, b.getMonth(), b.getDate());
+      const toBday = dayNum(nb) - dayNum(today);
+      const bdayLine = isBday ? '🎂 Happy birthday!' : `next birthday in ${plural(toBday, 'day')}`;
+      ageResult.innerHTML =
+        `<small>Age</small>${plural(y, 'year')}, ${plural(m, 'month')}, ${plural(d, 'day')}` +
+        `<small style="margin-top:.35rem">${total.toLocaleString('en-US')} days alive · ${bdayLine}</small>`;
+    }
+    ['input', 'change'].forEach(ev => ageDob.addEventListener(ev, ageCalc));
+
+    const dbdA = document.getElementById('dbd-a');
+    const dbdB = document.getElementById('dbd-b');
+    const dbdResult = document.getElementById('dbd-result');
+    function dbdCalc() {
+      const a = parseYMD(dbdA.value), b = parseYMD(dbdB.value);
+      if (!a || !b) { dbdResult.innerHTML = '<small>Difference</small>—'; return; }
+      const diff = Math.abs(dayNum(b) - dayNum(a));
+      const weeks = Math.floor(diff / 7), rem = diff % 7;
+      const breakdown = diff >= 7 ? `<small style="margin-top:.35rem">= ${plural(weeks, 'week')}${rem ? ' and ' + plural(rem, 'day') : ''}</small>` : '';
+      dbdResult.innerHTML = `<small>Difference</small>${plural(diff, 'day')}${breakdown}`;
+    }
+    [dbdA, dbdB].forEach(el => ['input', 'change'].forEach(ev => el.addEventListener(ev, dbdCalc)));
+
+    const daddDate = document.getElementById('dadd-date');
+    const daddDays = document.getElementById('dadd-days');
+    const daddResult = document.getElementById('dadd-result');
+    function daddCalc() {
+      const d = parseYMD(daddDate.value);
+      const n = Math.trunc(daddDays.valueAsNumber); // parseInt reads "1e9" as 1
+      if (!d || !isFinite(n)) { daddResult.innerHTML = '<small>Lands on</small>—'; return; }
+      const out = new Date(d.getTime());
+      out.setDate(out.getDate() + n);
+      if (isNaN(out.getTime())) { daddResult.innerHTML = '<small>Lands on</small>Beyond the calendar\'s range 🚀'; return; }
+      daddResult.innerHTML = `<small>Lands on</small>${longDate(out)}`;
+    }
+    [daddDate, daddDays].forEach(el => ['input', 'change'].forEach(ev => el.addEventListener(ev, daddCalc)));
+
+    // ---------- contact form ----------
+    const form = document.getElementById('contactForm');
+    const status = document.getElementById('formStatus');
+
+    function showStatus(msg, ok) {
+      status.textContent = msg;
+      status.className = 'form-status show ' + (ok ? 'ok' : 'err');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      const mode = form.dataset.mode;
+      const name = form.name.value.trim();
+      const email = form.email.value.trim();
+      const message = form.message.value.trim();
+
+      if (mode === 'mailto') {
+        // Zero-setup: open the guest's email app pre-filled to you.
+        e.preventDefault();
+        const to = form.dataset.email;
+        const subject = encodeURIComponent(`Portfolio message from ${name}`);
+        const body = encodeURIComponent(`${message}\n\n— ${name} (${email})`);
+        window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+        showStatus("Opening your email app… if nothing happens, email me directly.", true);
+        return;
+      }
+
+      // Formspree (or any endpoint): submit via fetch, no page reload.
+      e.preventDefault();
+      const btn = form.querySelector('button[type="submit"]');
+      btn.disabled = true; btn.textContent = 'Sending…';
+      try {
+        const res = await fetch(form.action, {
+          method: 'POST',
+          headers: { 'Accept': 'application/json' },
+          body: new FormData(form)
+        });
+        if (res.ok) {
+          form.reset();
+          showStatus("Thanks! Your message is on its way. 🎉", true);
+        } else {
+          showStatus("Something went wrong — please email me directly.", false);
+        }
+      } catch {
+        showStatus("Network error — please email me directly.", false);
+      } finally {
+        btn.disabled = false; btn.textContent = 'Send message →';
+      }
+    });
+
+    // ---------- Colorful cursor smoke + click sparkles ----------
+    (function () {
+      const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduce) return; // respect users who opt out of motion
+
+      const canvas = document.getElementById('fx');
+      const ctx = canvas.getContext('2d');
+      const PALETTE = ['#ff2e88', '#9b5cff', '#21e6c1', '#ffd23f', '#ff6b35'];
+      let W, H, dpr;
+
+      function resize() {
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        W = canvas.width = innerWidth * dpr;
+        H = canvas.height = innerHeight * dpr;
+        canvas.style.width = innerWidth + 'px';
+        canvas.style.height = innerHeight + 'px';
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      resize();
+      addEventListener('resize', resize);
+
+      const rand = (a, b) => a + Math.random() * (b - a);
+      const pick = arr => arr[(Math.random() * arr.length) | 0];
+      const particles = [];
+
+      // Soft, glowing puff of colored vapor
+      function smoke(x, y) {
+        particles.push({
+          type: 'smoke', x, y,
+          vx: rand(-0.4, 0.4), vy: rand(-0.9, -0.2),
+          r: rand(8, 22), life: 1, decay: rand(0.008, 0.018),
+          color: pick(PALETTE)
+        });
+      }
+
+      // Bright four-point sparkle
+      function sparkle(x, y) {
+        const a = rand(0, Math.PI * 2), s = rand(2, 7);
+        particles.push({
+          type: 'spark', x, y,
+          vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+          r: rand(2, 5), life: 1, decay: rand(0.02, 0.045),
+          spin: rand(0, Math.PI), color: pick(PALETTE)
+        });
+      }
+
+      // Gentle drifting sparkle for the cursor trail (softer than a click spark)
+      function trailSpark(x, y) {
+        const a = rand(0, Math.PI * 2), s = rand(0.3, 1.4);
+        particles.push({
+          type: 'spark', x: x + rand(-6, 6), y: y + rand(-6, 6),
+          vx: Math.cos(a) * s, vy: Math.sin(a) * s - 0.3,
+          r: rand(1.5, 3.5), life: 1, decay: rand(0.025, 0.05),
+          spin: rand(0, Math.PI), color: pick(PALETTE)
+        });
+      }
+
+      // Cursor smoke + constant sparkle trail (thicker: fires on every move)
+      let lastX, lastY;
+      addEventListener('pointermove', e => {
+        lastX = e.clientX; lastY = e.clientY;
+        smoke(e.clientX, e.clientY); smoke(e.clientX, e.clientY);
+        for (let i = 0; i < 3; i++) trailSpark(e.clientX, e.clientY);
+      });
+
+      // Click burst of sparkles
+      addEventListener('pointerdown', e => {
+        for (let i = 0; i < 26; i++) sparkle(e.clientX, e.clientY);
+        for (let i = 0; i < 6; i++) smoke(e.clientX, e.clientY);
+      });
+
+      function drawSpark(p) {
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.spin);
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.shadowBlur = 12; ctx.shadowColor = p.color;
+        const r = p.r, r2 = r * 0.34;
+        ctx.beginPath();
+        for (let i = 0; i < 8; i++) {
+          const ang = (Math.PI / 4) * i;
+          const rad = i % 2 === 0 ? r : r2;
+          ctx[i ? 'lineTo' : 'moveTo'](Math.cos(ang) * rad, Math.sin(ang) * rad);
+        }
+        ctx.closePath(); ctx.fill();
+        ctx.restore();
+      }
+
+      function frame() {
+        // fade the previous frame for smoky trails
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(14,14,20,0.18)';
+        ctx.fillRect(0, 0, innerWidth, innerHeight);
+
+        ctx.globalCompositeOperation = 'lighter'; // additive = glowing colors
+        for (let i = particles.length - 1; i >= 0; i--) {
+          const p = particles[i];
+          p.x += p.vx; p.y += p.vy;
+          p.life -= p.decay;
+          if (p.type === 'smoke') {
+            p.r += 0.5; p.vy *= 0.98;
+            const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.r);
+            g.addColorStop(0, p.color);
+            g.addColorStop(1, 'transparent');
+            ctx.globalAlpha = p.life * 0.5;
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            p.vy += 0.06; p.vx *= 0.97; p.spin += 0.2;
+            drawSpark(p);
+          }
+          if (p.life <= 0) particles.splice(i, 1);
+        }
+        ctx.globalAlpha = 1;
+        requestAnimationFrame(frame);
+      }
+      frame();
+    })();
+  </script>
+</body>
+</html>
