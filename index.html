@@ -290,6 +290,11 @@
     0%, 100% { opacity: .25; transform: scale(.75) rotate(0deg); }
     50%      { opacity: 1;   transform: scale(1.3)  rotate(20deg); }
   }
+  /* the ✨ kill-switch freezes the footer too (glow stays, motion stops) */
+  body.fx-off footer,
+  body.fx-off footer::before,
+  body.fx-off footer::after,
+  body.fx-off footer .wave { animation: none; }
 
   /* ---------- Reveal on scroll ---------- */
   .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
@@ -923,7 +928,8 @@
       let fxOn = localStorage.getItem('fx') !== 'off';
       const syncFxBtn = () => {
         fxBtn.setAttribute('aria-pressed', String(fxOn));
-        fxBtn.title = fxOn ? 'Turn off cursor sparkles' : 'Turn on cursor sparkles';
+        fxBtn.title = fxOn ? 'Turn off sparkles & motion' : 'Turn on sparkles & motion';
+        document.body.classList.toggle('fx-off', !fxOn);
       };
       syncFxBtn();
       fxBtn.addEventListener('click', () => {
