@@ -20,6 +20,7 @@
     --yellow:    #ffd23f;
     --orange:    #ff6b35;
     --green:     #39ff14;
+    --neonpurple:#b026ff;
     --ring:      rgba(255,255,255,.12);
     --grad: linear-gradient(120deg, var(--pink), var(--purple) 45%, var(--cyan));
     --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -260,20 +261,30 @@
 
   footer {
     text-align: center; padding: 2.5rem 1.5rem; font-size: .9rem; font-weight: 600;
-    color: var(--green);
-    text-shadow: 0 0 5px rgba(57,255,20,.75), 0 0 16px rgba(57,255,20,.4);
-    border-top: 1px solid rgba(57,255,20,.35);
-    box-shadow: 0 -1px 18px rgba(57,255,20,.12);
-    animation: neonPulse 2.2s ease-in-out infinite;
+    color: var(--neonpurple);
+    text-shadow: 0 0 6px rgba(176,38,255,.85), 0 0 18px rgba(176,38,255,.5), 0 0 36px rgba(155,92,255,.3);
+    border-top: 1px solid rgba(176,38,255,.35);
+    box-shadow: 0 -1px 18px rgba(176,38,255,.14);
+    animation: fogPulse 3.2s ease-in-out infinite;
   }
   footer::before, footer::after {
     content: '✦'; display: inline-block; margin: 0 .65rem;
     animation: twinkle 1.6s ease-in-out infinite;
   }
   footer::after { animation-delay: -.8s; }
-  @keyframes neonPulse {
-    0%, 100% { text-shadow: 0 0 4px rgba(57,255,20,.7), 0 0 14px rgba(57,255,20,.35); }
-    50%      { text-shadow: 0 0 8px rgba(57,255,20,1), 0 0 26px rgba(57,255,20,.65), 0 0 44px rgba(57,255,20,.35); }
+  /* each letter bobs on its own delay = the wave; drifting blurred glow = the fog */
+  footer .wave {
+    display: inline-block;
+    animation: waveBob 2.6s ease-in-out infinite;
+    animation-delay: calc(var(--i) * .06s);
+  }
+  @keyframes waveBob {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-4px); }
+  }
+  @keyframes fogPulse {
+    0%, 100% { text-shadow: 0 0 6px rgba(176,38,255,.85), -10px 0 22px rgba(155,92,255,.45), 10px 0 38px rgba(176,38,255,.2); }
+    50%      { text-shadow: 0 0 10px rgba(176,38,255,1), 10px 0 26px rgba(155,92,255,.55), -10px 0 44px rgba(176,38,255,.3); }
   }
   @keyframes twinkle {
     0%, 100% { opacity: .25; transform: scale(.75) rotate(0deg); }
@@ -550,6 +561,34 @@
   <script>
     // current year
     document.getElementById('year').textContent = new Date().getFullYear();
+
+    // wrap each footer letter in a .wave span with a staggered delay index,
+    // preserving the <span id="year"> and <em> structure (spaces stay text)
+    (function wavifyFooter() {
+      let i = 0;
+      const walk = node => {
+        for (const child of [...node.childNodes]) {
+          if (child.nodeType === Node.TEXT_NODE) {
+            const frag = document.createDocumentFragment();
+            for (const ch of child.textContent) {
+              if (ch.trim()) {
+                const s = document.createElement('span');
+                s.className = 'wave';
+                s.style.setProperty('--i', i++);
+                s.textContent = ch;
+                frag.appendChild(s);
+              } else {
+                frag.appendChild(document.createTextNode(ch));
+              }
+            }
+            child.replaceWith(frag);
+          } else if (child.nodeType === Node.ELEMENT_NODE) {
+            walk(child);
+          }
+        }
+      };
+      walk(document.querySelector('footer'));
+    })();
 
     // mobile nav toggle
     document.querySelector('.nav-toggle').addEventListener('click', () => {
