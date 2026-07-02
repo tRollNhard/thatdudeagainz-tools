@@ -19,6 +19,7 @@
     --cyan:      #21e6c1;
     --yellow:    #ffd23f;
     --orange:    #ff6b35;
+    --green:     #39ff14;
     --ring:      rgba(255,255,255,.12);
     --grad: linear-gradient(120deg, var(--pink), var(--purple) 45%, var(--cyan));
     --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -257,7 +258,27 @@
   .form-status.ok  { background: rgba(33,230,193,.14); color: var(--cyan); border: 1px solid rgba(33,230,193,.3); }
   .form-status.err { background: rgba(255,46,136,.14); color: var(--pink); border: 1px solid rgba(255,46,136,.3); }
 
-  footer { text-align: center; padding: 2.5rem 1.5rem; color: var(--muted); font-size: .9rem; border-top: 1px solid var(--ring); }
+  footer {
+    text-align: center; padding: 2.5rem 1.5rem; font-size: .9rem; font-weight: 600;
+    color: var(--green);
+    text-shadow: 0 0 5px rgba(57,255,20,.75), 0 0 16px rgba(57,255,20,.4);
+    border-top: 1px solid rgba(57,255,20,.35);
+    box-shadow: 0 -1px 18px rgba(57,255,20,.12);
+    animation: neonPulse 2.2s ease-in-out infinite;
+  }
+  footer::before, footer::after {
+    content: '✦'; display: inline-block; margin: 0 .65rem;
+    animation: twinkle 1.6s ease-in-out infinite;
+  }
+  footer::after { animation-delay: -.8s; }
+  @keyframes neonPulse {
+    0%, 100% { text-shadow: 0 0 4px rgba(57,255,20,.7), 0 0 14px rgba(57,255,20,.35); }
+    50%      { text-shadow: 0 0 8px rgba(57,255,20,1), 0 0 26px rgba(57,255,20,.65), 0 0 44px rgba(57,255,20,.35); }
+  }
+  @keyframes twinkle {
+    0%, 100% { opacity: .25; transform: scale(.75) rotate(0deg); }
+    50%      { opacity: 1;   transform: scale(1.3)  rotate(20deg); }
+  }
 
   /* ---------- Reveal on scroll ---------- */
   .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
