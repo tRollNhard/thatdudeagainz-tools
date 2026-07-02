@@ -207,6 +207,7 @@
     text-transform: none; letter-spacing: 0; font-size: .85rem; font-weight: 600; color: var(--text); cursor: pointer;
   }
   .pw-opts input { width: auto; margin: 0; }
+  .pw-opts input:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
   #pw-out { font-family: ui-monospace, Consolas, monospace; letter-spacing: .04em; font-size: 1.05rem; }
   .tool-ui input[type="range"] { padding: 0; border: none; background: transparent; }
 
@@ -268,7 +269,9 @@
     animation: fogPulse 3.2s ease-in-out infinite;
   }
   footer::before, footer::after {
-    content: '✦'; display: inline-block; margin: 0 .65rem;
+    content: '✦';
+    content: '✦' / ''; /* empty alt text hides the decorative stars from screen readers */
+    display: inline-block; margin: 0 .65rem;
     animation: twinkle 1.6s ease-in-out infinite;
   }
   footer::after { animation-delay: -.8s; }
@@ -308,7 +311,8 @@
     section { padding: 4rem 1.25rem; }
   }
   @media (prefers-reduced-motion: reduce) {
-    * { animation: none !important; scroll-behavior: auto; }
+    /* pseudo-elements escape the bare universal selector, so list them */
+    *, *::before, *::after { animation: none !important; scroll-behavior: auto; }
     .reveal { opacity: 1; transform: none; }
   }
 </style>
@@ -331,7 +335,7 @@
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
-    <button class="fx-toggle" id="fxToggle" type="button" aria-pressed="true" title="Toggle cursor sparkles">✨</button>
+    <button class="fx-toggle" id="fxToggle" type="button" aria-pressed="true" aria-label="Toggle sparkles and motion" title="Toggle sparkles and motion">✨</button>
     <button class="nav-toggle" aria-label="Menu">☰</button>
   </header>
 
@@ -495,18 +499,18 @@
           <label for="pw-len">Length: <span id="pw-len-out">16</span></label>
           <input type="range" id="pw-len" min="8" max="64" value="16" />
           <div class="pw-opts">
-            <label><input type="checkbox" id="pw-lower" checked /> a–z</label>
-            <label><input type="checkbox" id="pw-upper" checked /> A–Z</label>
-            <label><input type="checkbox" id="pw-digits" checked /> 0–9</label>
-            <label><input type="checkbox" id="pw-symbols" checked /> !@#$</label>
-            <label><input type="checkbox" id="pw-nolook" /> no look-alikes</label>
+            <label><input type="checkbox" id="pw-lower" checked aria-label="Include lowercase letters" /> a–z</label>
+            <label><input type="checkbox" id="pw-upper" checked aria-label="Include uppercase letters" /> A–Z</label>
+            <label><input type="checkbox" id="pw-digits" checked aria-label="Include digits" /> 0–9</label>
+            <label><input type="checkbox" id="pw-symbols" checked aria-label="Include symbols" /> !@#$</label>
+            <label><input type="checkbox" id="pw-nolook" aria-label="Exclude look-alike characters such as 0, O, 1, l, I" /> no look-alikes</label>
           </div>
           <input type="text" id="pw-out" readonly aria-label="Generated password" spellcheck="false" />
           <div class="mini-btns">
             <button class="mini-btn" type="button" id="pw-new">🎲 New password</button>
             <button class="mini-btn" type="button" id="pw-copy">📋 Copy</button>
           </div>
-          <div class="result" id="pw-strength" aria-live="polite"><small>Strength</small>—</div>
+          <div class="result" id="pw-strength"><small>Strength</small>—</div>
         </div>
       </article>
 
@@ -819,17 +823,13 @@
     const pwOut = document.getElementById('pw-out');
     const pwStrength = document.getElementById('pw-strength');
 
-    function pwPool() {
-      let pool = '';
-      for (const k of Object.keys(PW_SETS)) {
-        if (document.getElementById('pw-' + k).checked) pool += PW_SETS[k];
-      }
-      if (document.getElementById('pw-nolook').checked) pool = pool.replace(LOOKALIKES, '');
-      return pool;
-    }
-
     function pwGenerate() {
-      const pool = pwPool();
+      const noLook = document.getElementById('pw-nolook').checked;
+      const sets = Object.keys(PW_SETS)
+        .filter(k => document.getElementById('pw-' + k).checked)
+        .map(k => noLook ? PW_SETS[k].replace(LOOKALIKES, '') : PW_SETS[k])
+        .filter(s => s.length);
+      const pool = sets.join('');
       pwLenOut.textContent = pwLen.value;
       if (!pool) {
         pwOut.value = '';
@@ -840,14 +840,20 @@
       // Rejection sampling: only accept bytes below the largest multiple of
       // pool.length, otherwise `byte % pool.length` over-picks early characters.
       const limit = 256 - (256 % pool.length);
-      const chars = [];
-      while (chars.length < len) {
-        const buf = crypto.getRandomValues(new Uint8Array(len * 2));
-        for (const b of buf) {
-          if (b < limit && chars.length < len) chars.push(pool[b % pool.length]);
+      let pw = '', tries = 0;
+      // Redraw (rare) until every selected set is represented, so a password
+      // with "symbols" checked always contains at least one symbol.
+      do {
+        const chars = [];
+        while (chars.length < len) {
+          const buf = crypto.getRandomValues(new Uint8Array(len * 2));
+          for (const b of buf) {
+            if (b < limit && chars.length < len) chars.push(pool[b % pool.length]);
+          }
         }
-      }
-      pwOut.value = chars.join('');
+        pw = chars.join('');
+      } while (++tries < 64 && !sets.every(set => [...pw].some(c => set.includes(c))));
+      pwOut.value = pw;
       const bits = Math.round(len * Math.log2(pool.length));
       const label = bits >= 100 ? 'Excellent 🔒' : bits >= 70 ? 'Strong 💪' : bits >= 45 ? 'Okay' : 'Weak — go longer';
       pwStrength.innerHTML = `<small>Strength</small>${label}<small style="margin-top:.35rem">~${bits} bits of entropy</small>`;
@@ -925,7 +931,8 @@
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       if (reduce) { fxBtn.style.display = 'none'; return; } // respect users who opt out of motion
 
-      let fxOn = localStorage.getItem('fx') !== 'off';
+      let fxOn = true;
+      try { fxOn = localStorage.getItem('fx') !== 'off'; } catch { /* storage blocked — default on */ }
       const syncFxBtn = () => {
         fxBtn.setAttribute('aria-pressed', String(fxOn));
         fxBtn.title = fxOn ? 'Turn off sparkles & motion' : 'Turn on sparkles & motion';
@@ -934,7 +941,7 @@
       syncFxBtn();
       fxBtn.addEventListener('click', () => {
         fxOn = !fxOn;
-        localStorage.setItem('fx', fxOn ? 'on' : 'off');
+        try { localStorage.setItem('fx', fxOn ? 'on' : 'off'); } catch { /* preference won't persist */ }
         syncFxBtn();
         if (fxOn) ensureLoop();
       });
@@ -1018,9 +1025,9 @@
         const r = el.getBoundingClientRect();
         if (r.width === 0) return; // hidden fields
         const puffX = () => r.left + 8 + Math.random() * Math.max(8, r.width - 16);
-        smoke(puffX(), r.top + 4);
-        smoke(puffX(), r.top + 4);
-        trailSpark(puffX(), r.top);
+        smoke(puffX(), r.top - 6);
+        smoke(puffX(), r.top - 6);
+        trailSpark(puffX(), r.top - 8);
         ensureLoop();
       }, true);
 
@@ -1043,9 +1050,14 @@
       }
 
       function frame() {
-        // fade the previous frame for smoky trails
-        ctx.globalCompositeOperation = 'source-over';
-        ctx.fillStyle = 'rgba(14,14,20,0.18)';
+        // cap the population so a slow device can't spiral (oldest die first)
+        if (particles.length > 600) particles.splice(0, particles.length - 600);
+
+        // fade the previous frame for smoky trails by erasing alpha —
+        // painting a translucent dark fill instead would accumulate to a
+        // near-opaque sheet over the page, since this canvas overlays content
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.fillStyle = 'rgba(0,0,0,0.18)';
         ctx.fillRect(0, 0, innerWidth, innerHeight);
 
         ctx.globalCompositeOperation = 'lighter'; // additive = glowing colors
@@ -1070,16 +1082,21 @@
           if (p.life <= 0) particles.splice(i, 1);
         }
         ctx.globalAlpha = 1;
-        // Park the loop when FX is off and the last particles have faded,
-        // so an idle page burns zero frames.
-        if (!fxOn && particles.length === 0) {
-          ctx.clearRect(0, 0, innerWidth, innerHeight);
-          running = false;
-          return;
+        // Park the loop whenever particles are gone and their trails have
+        // finished fading (~40 frames of destination-out), so an idle page
+        // burns zero frames. Every spawn path re-arms via ensureLoop().
+        if (particles.length === 0) {
+          if (++idleFrames > 40) {
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
+            running = false;
+            return;
+          }
+        } else {
+          idleFrames = 0;
         }
         requestAnimationFrame(frame);
       }
-      let running = false;
+      let running = false, idleFrames = 0;
       function ensureLoop() {
         if (!running) { running = true; requestAnimationFrame(frame); }
       }
