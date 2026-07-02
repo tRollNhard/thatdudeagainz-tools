@@ -198,6 +198,24 @@
   .counts { display: flex; gap: 1.4rem; flex-wrap: wrap; margin: .4rem 0 .6rem; }
   .counts div b { display: block; font-size: 1.4rem; font-weight: 900; }
   .counts div span { color: var(--muted); font-size: .78rem; }
+  .tool-ui input[type="checkbox"], .tool-ui input[type="range"] { accent-color: var(--pink); }
+  .pw-opts { display: flex; gap: .4rem .9rem; flex-wrap: wrap; margin-bottom: .6rem; }
+  .pw-opts label {
+    display: inline-flex; align-items: center; gap: .4rem; margin: 0;
+    text-transform: none; letter-spacing: 0; font-size: .85rem; font-weight: 600; color: var(--text); cursor: pointer;
+  }
+  .pw-opts input { width: auto; margin: 0; }
+  #pw-out { font-family: ui-monospace, Consolas, monospace; letter-spacing: .04em; font-size: 1.05rem; }
+  .tool-ui input[type="range"] { padding: 0; border: none; background: transparent; }
+
+  /* ---------- FX toggle ---------- */
+  .fx-toggle {
+    background: none; border: 1px solid var(--ring); border-radius: 999px;
+    width: 2.4rem; height: 2.4rem; font-size: 1.05rem; cursor: pointer; color: var(--text);
+    transition: border-color .2s, opacity .2s; margin-left: 1rem; flex: 0 0 auto;
+  }
+  .fx-toggle:hover { border-color: var(--cyan); }
+  .fx-toggle[aria-pressed="false"] { opacity: .4; filter: grayscale(1); }
 
   /* ---------- Contact ---------- */
   .contact { text-align: center; }
@@ -276,6 +294,7 @@
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
+    <button class="fx-toggle" id="fxToggle" type="button" aria-pressed="true" title="Toggle cursor sparkles">✨</button>
     <button class="nav-toggle" aria-label="Menu">☰</button>
   </header>
 
@@ -307,7 +326,7 @@
         <h2>Everyday tools, <span class="grad-text">zero friction.</span></h2>
         <p>Built by THATdudeAGAIN'z — a maker with a love for strong type, punchy color, and tools that feel alive. Everything here runs 100% in your browser: nothing is uploaded, nothing is tracked, and it even works offline once the page loads.</p>
         <div class="stats">
-          <div class="stat"><b class="grad-text">4</b><span>Tools live (more coming)</span></div>
+          <div class="stat"><b class="grad-text">5</b><span>Tools live (more coming)</span></div>
           <div class="stat"><b class="grad-text">0</b><span>Ads &amp; sign-ups</span></div>
           <div class="stat"><b class="grad-text">100%</b><span>Free, in your browser</span></div>
         </div>
@@ -427,6 +446,30 @@
             <div><input type="number" id="dadd-days" placeholder="90 or -30" step="1" inputmode="numeric" aria-label="Days to add, negative to subtract" /></div>
           </div>
           <div class="result" id="dadd-result" aria-live="polite"><small>Lands on</small>—</div>
+        </div>
+      </article>
+
+      <!-- ---- Password generator ---- -->
+      <article class="card">
+        <span class="tag">Generate</span>
+        <h3>Password Generator</h3>
+        <p>Cryptographically random passwords, made on your device — never sent anywhere.</p>
+        <div class="tool-ui">
+          <label for="pw-len">Length: <span id="pw-len-out">16</span></label>
+          <input type="range" id="pw-len" min="8" max="64" value="16" />
+          <div class="pw-opts">
+            <label><input type="checkbox" id="pw-lower" checked /> a–z</label>
+            <label><input type="checkbox" id="pw-upper" checked /> A–Z</label>
+            <label><input type="checkbox" id="pw-digits" checked /> 0–9</label>
+            <label><input type="checkbox" id="pw-symbols" checked /> !@#$</label>
+            <label><input type="checkbox" id="pw-nolook" /> no look-alikes</label>
+          </div>
+          <input type="text" id="pw-out" readonly aria-label="Generated password" spellcheck="false" />
+          <div class="mini-btns">
+            <button class="mini-btn" type="button" id="pw-new">🎲 New password</button>
+            <button class="mini-btn" type="button" id="pw-copy">📋 Copy</button>
+          </div>
+          <div class="result" id="pw-strength" aria-live="polite"><small>Strength</small>—</div>
         </div>
       </article>
 
@@ -698,6 +741,70 @@
     }
     [daddDate, daddDays].forEach(el => ['input', 'change'].forEach(ev => el.addEventListener(ev, daddCalc)));
 
+    // ---------- TOOL 5: password generator ----------
+    const PW_SETS = {
+      lower: 'abcdefghijklmnopqrstuvwxyz',
+      upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+      digits: '0123456789',
+      symbols: '!@#$%^&*()-_=+[]{};:,.?'
+    };
+    const LOOKALIKES = /[0O1lI|]/g;
+    const pwLen = document.getElementById('pw-len');
+    const pwLenOut = document.getElementById('pw-len-out');
+    const pwOut = document.getElementById('pw-out');
+    const pwStrength = document.getElementById('pw-strength');
+
+    function pwPool() {
+      let pool = '';
+      for (const k of Object.keys(PW_SETS)) {
+        if (document.getElementById('pw-' + k).checked) pool += PW_SETS[k];
+      }
+      if (document.getElementById('pw-nolook').checked) pool = pool.replace(LOOKALIKES, '');
+      return pool;
+    }
+
+    function pwGenerate() {
+      const pool = pwPool();
+      pwLenOut.textContent = pwLen.value;
+      if (!pool) {
+        pwOut.value = '';
+        pwStrength.innerHTML = '<small>Strength</small>Pick at least one character set';
+        return;
+      }
+      const len = +pwLen.value;
+      // Rejection sampling: only accept bytes below the largest multiple of
+      // pool.length, otherwise `byte % pool.length` over-picks early characters.
+      const limit = 256 - (256 % pool.length);
+      const chars = [];
+      while (chars.length < len) {
+        const buf = crypto.getRandomValues(new Uint8Array(len * 2));
+        for (const b of buf) {
+          if (b < limit && chars.length < len) chars.push(pool[b % pool.length]);
+        }
+      }
+      pwOut.value = chars.join('');
+      const bits = Math.round(len * Math.log2(pool.length));
+      const label = bits >= 100 ? 'Excellent 🔒' : bits >= 70 ? 'Strong 💪' : bits >= 45 ? 'Okay' : 'Weak — go longer';
+      pwStrength.innerHTML = `<small>Strength</small>${label}<small style="margin-top:.35rem">~${bits} bits of entropy</small>`;
+    }
+
+    ['pw-lower', 'pw-upper', 'pw-digits', 'pw-symbols', 'pw-nolook'].forEach(id =>
+      document.getElementById(id).addEventListener('change', pwGenerate));
+    pwLen.addEventListener('input', pwGenerate);
+    document.getElementById('pw-new').addEventListener('click', pwGenerate);
+    document.getElementById('pw-copy').addEventListener('click', async (e) => {
+      if (!pwOut.value) return;
+      try {
+        await navigator.clipboard.writeText(pwOut.value);
+        e.target.textContent = '✅ Copied!';
+      } catch {
+        pwOut.select(); document.execCommand('copy');
+        e.target.textContent = '✅ Copied!';
+      }
+      setTimeout(() => { e.target.textContent = '📋 Copy'; }, 1500);
+    });
+    pwGenerate();
+
     // ---------- contact form ----------
     const form = document.getElementById('contactForm');
     const status = document.getElementById('formStatus');
@@ -749,8 +856,22 @@
 
     // ---------- Colorful cursor smoke + click sparkles ----------
     (function () {
+      const fxBtn = document.getElementById('fxToggle');
       const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-      if (reduce) return; // respect users who opt out of motion
+      if (reduce) { fxBtn.style.display = 'none'; return; } // respect users who opt out of motion
+
+      let fxOn = localStorage.getItem('fx') !== 'off';
+      const syncFxBtn = () => {
+        fxBtn.setAttribute('aria-pressed', String(fxOn));
+        fxBtn.title = fxOn ? 'Turn off cursor sparkles' : 'Turn on cursor sparkles';
+      };
+      syncFxBtn();
+      fxBtn.addEventListener('click', () => {
+        fxOn = !fxOn;
+        localStorage.setItem('fx', fxOn ? 'on' : 'off');
+        syncFxBtn();
+        if (fxOn) ensureLoop();
+      });
 
       const canvas = document.getElementById('fx');
       const ctx = canvas.getContext('2d');
@@ -807,15 +928,19 @@
       // Cursor smoke + constant sparkle trail (thicker: fires on every move)
       let lastX, lastY;
       addEventListener('pointermove', e => {
+        if (!fxOn) return;
         lastX = e.clientX; lastY = e.clientY;
         smoke(e.clientX, e.clientY); smoke(e.clientX, e.clientY);
         for (let i = 0; i < 3; i++) trailSpark(e.clientX, e.clientY);
+        ensureLoop();
       });
 
       // Click burst of sparkles
       addEventListener('pointerdown', e => {
+        if (!fxOn) return;
         for (let i = 0; i < 26; i++) sparkle(e.clientX, e.clientY);
         for (let i = 0; i < 6; i++) smoke(e.clientX, e.clientY);
+        ensureLoop();
       });
 
       function drawSpark(p) {
@@ -864,9 +989,20 @@
           if (p.life <= 0) particles.splice(i, 1);
         }
         ctx.globalAlpha = 1;
+        // Park the loop when FX is off and the last particles have faded,
+        // so an idle page burns zero frames.
+        if (!fxOn && particles.length === 0) {
+          ctx.clearRect(0, 0, innerWidth, innerHeight);
+          running = false;
+          return;
+        }
         requestAnimationFrame(frame);
       }
-      frame();
+      let running = false;
+      function ensureLoop() {
+        if (!running) { running = true; requestAnimationFrame(frame); }
+      }
+      ensureLoop();
     })();
   </script>
 </body>
