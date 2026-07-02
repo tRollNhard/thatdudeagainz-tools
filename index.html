@@ -964,6 +964,21 @@
         ensureLoop();
       });
 
+      // Typing vapor: every keystroke in a text box puffs colored smoke
+      // that rises off the field (delegated, so it covers future tools too)
+      document.addEventListener('input', e => {
+        if (!fxOn) return;
+        const el = e.target;
+        if (!el.matches('input:not([type="checkbox"]):not([type="range"]), textarea')) return;
+        const r = el.getBoundingClientRect();
+        if (r.width === 0) return; // hidden fields
+        const puffX = () => r.left + 8 + Math.random() * Math.max(8, r.width - 16);
+        smoke(puffX(), r.top + 4);
+        smoke(puffX(), r.top + 4);
+        trailSpark(puffX(), r.top);
+        ensureLoop();
+      }, true);
+
       function drawSpark(p) {
         ctx.save();
         ctx.translate(p.x, p.y);
