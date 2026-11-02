@@ -4,8 +4,16 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>THATdudeAGAIN'z Tools — free browser utilities</title>
-<meta name="description" content="THATdudeAGAIN'z Tools — small, fast, free utilities that run right in your browser. Unit converter, tip calculator, word counter, and more." />
+<meta name="description" content="THATdudeAGAIN'z Tools — small, fast, free utilities that run right in your browser. Unit converter, tip calculator, word counter, text tools, and more." />
+<meta name="theme-color" content="#fff4e0" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff2e88'/%3E%3Cstop offset='.5' stop-color='%239b5cff'/%3E%3Cstop offset='1' stop-color='%2321e6c1'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='url(%23g)'/%3E%3Ctext x='32' y='43' font-family='Arial Black,Arial' font-weight='900' font-size='30' text-anchor='middle' fill='%230e0e14'%3ETDA%3C/text%3E%3C/svg%3E" />
+<meta property="og:title" content="THATdudeAGAIN'z Tools — free browser utilities" />
+<meta property="og:description" content="6 free tools: unit converter, tip calculator, word counter, date calculator, password generator and text tools. No ads, runs in your browser." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://trollnhard.github.io/thatdudeagainz-tools/" />
+<meta name="twitter:card" content="summary" />
 <style>
+
   /* ============================================================
      EDIT ME: Brand colors. Change these to re-skin the whole site.
      ============================================================ */
@@ -218,6 +226,38 @@
   #pw-out { font-family: ui-monospace, Consolas, monospace; letter-spacing: .04em; font-size: 1.05rem; }
   .tool-ui input[type="range"] { padding: 0; border: none; background: transparent; }
 
+
+  /* ---------- Text Tools card ---------- */
+  [hidden] { display: none !important; }
+  .tt-tabs { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; margin-bottom: 1rem; }
+  .tt-tab {
+    min-height: 46px; padding: .4rem .35rem; border: 2px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink);
+    font: inherit; font-size: .82rem; font-weight: 800; line-height: 1.15; cursor: pointer; text-align: center;
+    box-shadow: 3px 3px 0 var(--ink); transition: transform .12s, box-shadow .12s, background .12s;
+  }
+  .tt-tab:hover { background: var(--yellow); transform: translate(-1px,-1px); }
+  .tt-tab[aria-selected="true"] { background: var(--ink); color: var(--yellow); box-shadow: 1px 1px 0 var(--ink); transform: translate(2px,2px); }
+  .tool-ui .tt-field input, .tool-ui .tt-field select { min-height: 46px; }
+  .tt-opts { display: flex; flex-wrap: wrap; gap: 0 1rem; margin-bottom: .4rem; }
+  .tt-opts label.tt-check {
+    display: inline-flex; align-items: center; gap: .5rem; min-height: 46px; margin: 0; cursor: pointer;
+    text-transform: none; letter-spacing: 0; font-size: .9rem; font-weight: 700; color: var(--ink);
+  }
+  .tt-opts input[type="checkbox"] { width: 1.25rem; height: 1.25rem; margin: 0; flex: 0 0 auto; accent-color: var(--pink); }
+  .tt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 .6rem; }
+  .tt-grid > div { min-width: 0; }
+  .tt-btns { display: flex; flex-wrap: wrap; gap: .6rem; margin: .1rem 0 .8rem; }
+  .tt-btn {
+    flex: 1 1 auto; min-height: 46px; min-width: 46px; padding: .45rem .9rem; border: 2px solid var(--ink); border-radius: 8px; background: #fff; color: var(--ink);
+    font: inherit; font-size: .88rem; font-weight: 800; cursor: pointer; box-shadow: 3px 3px 0 var(--ink); transition: transform .12s, background .12s;
+  }
+  .tt-btn:hover { background: var(--yellow); transform: translate(-1px,-1px); }
+  .tt-btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 var(--ink); }
+  .tt-btn.primary { background: var(--pink); color: #fff; }
+  .tt-btn.primary:hover { background: var(--ink); color: var(--yellow); }
+  .tool-ui textarea.tt-out { background: var(--bg); min-height: 120px; }
+  .tt-tab:focus-visible, .tt-btn:focus-visible, .tt-opts input:focus-visible { outline: 3px solid var(--purple); outline-offset: 3px; }
+
   /* ---------- FX toggle ---------- */
   .fx-toggle {
     background: none; border: 1px solid var(--ring); border-radius: 999px;
@@ -322,6 +362,116 @@
     *, *::before, *::after { animation: none !important; scroll-behavior: auto; }
     .reveal { opacity: 1; transform: none; }
   }
+
+  /* ===== shared fixes (all options) ===== */
+  header.site-header { max-width: none; padding: 0; display: block; margin: 0; }
+  .header-inner { display: flex; align-items: center; gap: .5rem; max-width: 1100px; margin: 0 auto; padding: .9rem 1.5rem; }
+  .header-inner nav { margin-left: auto; }
+  .hero h1 { font-size: clamp(2.3rem, 10.5vw, 6rem); overflow-wrap: anywhere; }
+  .row-sep { flex: 0 0 auto !important; color: var(--muted); font-weight: 700; margin-bottom: .6rem; }
+  .tool-ui .sub-label { margin-top: 1rem; }
+  .hero-support { margin-top: 1.25rem; color: var(--muted); font-size: .95rem; }
+  .hero-support a { color: var(--text); font-weight: 700; border-bottom: 1px solid currentColor; }
+  .hero-support a:hover { color: var(--yellow); }
+  .support-block { margin-top: 3rem; }
+  .support-btns { justify-content: center; margin-top: 1.25rem; }
+  .socials { margin-top: 2rem; }
+  .form-note a { color: var(--cyan); }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--cyan); outline-offset: 3px; }
+  .nav-toggle { width: 2.6rem; height: 2.6rem; }
+  @media (max-width: 720px) {
+    .header-inner { padding: .75rem 1.25rem; }
+    nav ul#site-nav.open {
+      display: flex; flex-direction: column; gap: .25rem; position: absolute; top: 4rem; right: 1.25rem; left: 1.25rem;
+      background: var(--surface); padding: .75rem; border-radius: 16px; border: 1px solid var(--ring); box-shadow: 0 20px 50px rgba(0,0,0,.4);
+    }
+    nav ul#site-nav.open a { display: block; padding: .8rem 1rem; font-size: 1.1rem; color: var(--text); }
+    .cta-row .btn { flex: 1 1 100%; justify-content: center; }
+    .marquee { margin-top: 2.5rem; }
+  }
+  /* 6 tools: 3 across, then 3 across (balanced, no empty hole) */
+  @media (min-width: 1001px) {
+    .cards { grid-template-columns: repeat(3, 1fr) !important; }
+    .cards > .card { grid-column: auto; }
+    .cards > .card:nth-child(n+4) { grid-column: auto; }
+  }
+
+  /* ===== OPTION B: bolder — neo-brutalist poster: cream paper, black ink, color-block tools ===== */
+  :root { --bg:#fff4e0; --surface:#ffffff; --text:#111111; --muted:#3d3d3d; --ring:#111; --ink:#111;
+          --pink:#ff2e88; --purple:#7b3cff; --cyan:#00c2a8; --yellow:#ffd23f; --orange:#ff6b35;
+          --grad: linear-gradient(120deg, #ff2e88, #7b3cff 50%, #00c2a8); color-scheme: light; }
+  body { background: var(--bg) radial-gradient(#0000000d 1px, transparent 1px) 0 0/18px 18px; color: var(--text); }
+  .blob { display: none; }
+  .site-header { background: var(--yellow); border-bottom: 3px solid var(--ink); }
+  .logo { font-size: 1.45rem; font-weight: 900; letter-spacing: -.03em; }
+  .logo span { color: var(--ink); background: var(--pink); color:#fff; padding: 0 .3rem; margin-left: .15rem; border: 2px solid var(--ink); }
+  nav a { color: var(--ink); font-weight: 800; text-transform: uppercase; font-size: .9rem; }
+  nav a::after { background: var(--ink); height: 3px; }
+  .fx-toggle, .nav-toggle { border: 2px solid var(--ink); background: #fff; color: var(--ink); border-radius: 10px; box-shadow: 3px 3px 0 var(--ink); }
+  .eyebrow { background: var(--ink); color: var(--yellow); -webkit-background-clip: border-box; background-clip: border-box; padding: .35rem .7rem; }
+  .grad-text { background: none; color: var(--pink); -webkit-text-fill-color: currentColor; }
+  .hero h1 { font-size: clamp(2.4rem, 10.5vw, 7rem); line-height: .9; letter-spacing: -.05em; }
+  .hero h1 .grad-text { color: var(--ink); background: var(--cyan); padding: 0 .2em; display: inline-block; border: 4px solid var(--ink); box-shadow: 8px 8px 0 var(--ink); transform: rotate(-2deg); margin-top: .15em; }
+  .hero p.lead { color: var(--ink); font-weight: 500; }
+  .btn { border: 3px solid var(--ink) !important; border-radius: 12px; box-shadow: 5px 5px 0 var(--ink) !important; font-weight: 900; text-transform: uppercase; letter-spacing: .02em; }
+  .btn:hover { transform: translate(-2px,-2px) !important; box-shadow: 7px 7px 0 var(--ink) !important; }
+  .btn:active { transform: translate(3px,3px) !important; box-shadow: 1px 1px 0 var(--ink) !important; }
+  .btn-primary { background: var(--pink); color: #fff; }
+  .btn-ghost { background: #fff; color: var(--ink); }
+  .btn-kofi { background: var(--yellow); }
+  .btn-paypal { background: var(--cyan); }
+  .hero-support { color: var(--ink); }
+  .hero-support a:hover { color: var(--pink); }
+  .marquee { background: var(--ink); border-block: 3px solid var(--ink); padding: .6rem 0; -webkit-mask-image: none; transform: rotate(-1deg); border-radius: 6px; }
+  .marquee li { color: #fff !important; text-transform: uppercase; font-weight: 900; }
+  .marquee li:nth-child(4n+1) { color: var(--yellow) !important; }
+  h2 { text-transform: uppercase; letter-spacing: -.03em; }
+  .cards { grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.75rem; }
+  .card { border: 3px solid var(--ink); border-radius: 16px; box-shadow: 8px 8px 0 var(--ink); padding: 0; background: #fff; }
+  .card::before { display: none; }
+  .card:hover { transform: translate(-3px,-3px); border-color: var(--ink); box-shadow: 11px 11px 0 var(--ink); }
+  .card .tag { display: block; margin: 0; padding: .55rem 1.25rem; color: var(--ink); border-bottom: 3px solid var(--ink); font-weight: 900; letter-spacing: .14em; background: var(--yellow); }
+  .card:nth-child(1) .tag { background: var(--cyan); }
+  .card:nth-child(2) .tag { background: var(--yellow); }
+  .card:nth-child(3) .tag { background: var(--pink); color: #fff; }
+  .card:nth-child(4) .tag { background: var(--orange); }
+  .card:nth-child(5) .tag { background: var(--purple); color: #fff; }
+  .card:nth-child(6) .tag { background: #5ec2ff; }
+  .card h3, .card > p, .card .tool-ui { padding-left: 1.4rem; padding-right: 1.4rem; }
+  .card h3 { margin-top: 1.1rem; font-size: 1.55rem; font-weight: 900; text-transform: uppercase; letter-spacing: -.02em; }
+  .card > p { color: var(--muted); }
+  .card .tool-ui { padding-bottom: 1.5rem; }
+  .tool-ui label { color: var(--ink); font-weight: 800; }
+  .tool-ui input, .tool-ui select, .tool-ui textarea, .field input, .field textarea { background: #fff; color: var(--ink); border: 2px solid var(--ink); border-radius: 8px; }
+  .tool-ui input:focus, .tool-ui select:focus, .tool-ui textarea:focus, .field input:focus, .field textarea:focus { border-color: var(--ink); box-shadow: 4px 4px 0 var(--pink); }
+  .tool-ui input[type="range"] { border: none; }
+  .result { background: var(--ink); color: var(--yellow); border: 2px solid var(--ink); border-radius: 8px; }
+  .result small { color: #cfcfcf; }
+  .counts div b { color: var(--pink); }
+  .mini-btn { border: 2px solid var(--ink); color: var(--ink); background: #fff; border-radius: 8px; box-shadow: 3px 3px 0 var(--ink); font-weight: 800; }
+  .mini-btn:hover { color: var(--ink); border-color: var(--ink); background: var(--yellow); transform: translate(-1px,-1px); }
+  .swap-btn { border: 2px solid var(--ink); color: var(--ink); background: var(--cyan); font-weight: 900; }
+  .pw-opts label { color: var(--ink); }
+  .about-card { background: var(--pink); border: 4px solid var(--ink); box-shadow: 12px 12px 0 var(--ink); border-radius: 16px; aspect-ratio: 4/3; }
+  .about-card .initials { color: #fff; -webkit-text-stroke: 3px var(--ink); text-shadow: 6px 6px 0 var(--ink); }
+  .about p, .contact p, .stat span { color: var(--muted); }
+  .stat b { color: var(--ink); }
+  .stat:nth-child(1) b { color: var(--pink); } .stat:nth-child(2) b { color: var(--purple); } .stat:nth-child(3) b { color: var(--cyan); }
+  .contact-form { background: #fff; border: 3px solid var(--ink); border-radius: 16px; box-shadow: 10px 10px 0 var(--ink); }
+  .contact-form::before { height: 10px; background: repeating-linear-gradient(90deg, var(--pink) 0 40px, var(--yellow) 40px 80px, var(--cyan) 80px 120px, var(--purple) 120px 160px); }
+  .form-note, .support-note { color: var(--muted); }
+  .form-note a { color: var(--purple); font-weight: 700; }
+  .support-note a { color: var(--pink); }
+  .socials a { border: 2px solid var(--ink); background: #fff; box-shadow: 3px 3px 0 var(--ink); }
+  .socials a:hover { color: var(--ink); border-color: var(--ink); background: var(--yellow); }
+  footer { background: var(--ink); color: var(--yellow); text-shadow: none; border-top: 3px solid var(--ink); box-shadow: none; animation: none; }
+  footer em { color: #fff; }
+  a:focus-visible, button:focus-visible, select:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--purple); }
+  @media (max-width: 720px) {
+    nav ul#site-nav.open { background: #fff; border: 3px solid var(--ink); box-shadow: 6px 6px 0 var(--ink); }
+    .cards { grid-template-columns: 1fr; }
+  }
+
 </style>
 </head>
 <body>
@@ -332,32 +482,32 @@
   <!-- Colorful cursor smoke + click sparkles render here -->
   <canvas id="fx" aria-hidden="true"></canvas>
 
-  <header>
+  <header class="site-header"><div class="header-inner">
     <!-- EDIT ME: your name/logo -->
     <div class="logo">THATdude<span>AGAIN'z</span></div>
-    <nav>
-      <ul>
+    <nav aria-label="Main">
+      <ul id="site-nav">
         <li><a href="#tools">Tools</a></li>
         <li><a href="#about">About</a></li>
+        <li><a href="#support">Support</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
     </nav>
     <button class="fx-toggle" id="fxToggle" type="button" aria-pressed="true" aria-label="Toggle sparkles and motion" title="Toggle sparkles and motion">✨</button>
-    <button class="nav-toggle" aria-label="Menu">☰</button>
-  </header>
+    <button class="nav-toggle" aria-label="Menu" aria-expanded="false" aria-controls="site-nav">☰</button>
+  </div></header>
 
   <!-- ================= HERO ================= -->
   <section class="hero">
     <span class="eyebrow">🛠️ Welcome to</span>
     <!-- EDIT ME -->
-    <h1>THATdudeAGAIN'z<br><span class="grad-text">toolbox.</span></h1>
+    <h1>THATdudeAGAIN'z<br><span class="grad-text">toolbox!</span></h1>
     <p class="lead">Small, fast, free utilities that run right in your browser. No ads, no sign-ups, no nonsense — just tools that work.</p>
     <div class="cta-row">
       <a href="#tools" class="btn btn-primary">Use the tools →</a>
       <a href="#contact" class="btn btn-ghost">Request a tool</a>
-      <a href="https://ko-fi.com/thatdudeagainz" target="_blank" rel="noopener noreferrer" class="btn btn-kofi">☕ Fuel the tools</a>
-      <a href="https://www.paypal.me/THATdudeAGAINz" target="_blank" rel="noopener noreferrer" class="btn btn-paypal">💸 Tip via PayPal</a>
     </div>
+    <p class="hero-support">Free forever. Like it? <a href="https://ko-fi.com/thatdudeagainz" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a> · <a href="https://www.paypal.me/THATdudeAGAINz" target="_blank" rel="noopener noreferrer">💸 PayPal</a></p>
 
     <div class="marquee" aria-hidden="true">
       <ul>
@@ -367,27 +517,11 @@
     </div>
   </section>
 
-  <!-- ================= ABOUT ================= -->
-  <section id="about" class="about reveal">
-    <div class="about-grid">
-      <div class="about-card"><span class="initials">TDA</span></div>
-      <div>
-        <span class="eyebrow">About this site</span>
-        <h2>Everyday tools, <span class="grad-text">zero friction.</span></h2>
-        <p>Built by THATdudeAGAIN'z — a maker with a love for strong type, punchy color, and tools that feel alive. Everything here runs 100% in your browser: nothing is uploaded, nothing is tracked, and it even works offline once the page loads.</p>
-        <div class="stats">
-          <div class="stat"><b class="grad-text">5</b><span>Tools live (more coming)</span></div>
-          <div class="stat"><b class="grad-text">0</b><span>Ads &amp; sign-ups</span></div>
-          <div class="stat"><b class="grad-text">100%</b><span>Free, in your browser</span></div>
-        </div>
-      </div>
-    </div>
-  </section>
 
   <!-- ================= TOOLS ================= -->
-  <section id="tools" class="reveal">
+  <section id="tools" class="tools reveal">
     <span class="eyebrow">The tools</span>
-    <h2>Pick One and <span class="grad-text">Get er Done!</span></h2>
+    <h2>Pick one and <span class="grad-text">get 'er done.</span></h2>
     <div class="cards">
 
       <!-- ---- Unit converter ---- -->
@@ -439,10 +573,10 @@
             </div>
           </div>
           <div class="result" id="tip-result" aria-live="polite"><small>Tip · Total · Each pays</small>—</div>
-          <label for="pct-x" style="margin-top:.9rem">Quick percentage</label>
+          <label for="pct-x" class="sub-label">Quick percentage</label>
           <div class="row">
             <div><input type="number" id="pct-x" placeholder="15" step="any" inputmode="decimal" aria-label="Percent" /></div>
-            <div style="flex:0 0 auto; color:var(--muted); font-weight:700; margin-bottom:.6rem">% of</div>
+            <div class="row-sep">% of</div>
             <div><input type="number" id="pct-y" placeholder="200" step="any" inputmode="decimal" aria-label="Of amount" /></div>
           </div>
           <div class="result" id="pct-result" aria-live="polite"><small>Answer</small>—</div>
@@ -482,15 +616,15 @@
           <input type="date" id="age-dob" />
           <div class="result" id="age-result" aria-live="polite"><small>Age</small>—</div>
 
-          <label for="dbd-a" style="margin-top:.9rem">Days between two dates</label>
+          <label for="dbd-a" class="sub-label">Days between two dates</label>
           <div class="row">
             <div><input type="date" id="dbd-a" aria-label="First date" /></div>
-            <div style="flex:0 0 auto; color:var(--muted); font-weight:700; margin-bottom:.6rem">→</div>
+            <div class="row-sep">→</div>
             <div><input type="date" id="dbd-b" aria-label="Second date" /></div>
           </div>
           <div class="result" id="dbd-result" aria-live="polite"><small>Difference</small>—</div>
 
-          <label for="dadd-date" style="margin-top:.9rem">Add or subtract days</label>
+          <label for="dadd-date" class="sub-label">Add or subtract days</label>
           <div class="row">
             <div><input type="date" id="dadd-date" aria-label="Start date" /></div>
             <div><input type="number" id="dadd-days" placeholder="90 or -30" step="1" inputmode="numeric" aria-label="Days to add, negative to subtract" /></div>
@@ -523,6 +657,142 @@
         </div>
       </article>
 
+      <!-- ---- Text tools ---- -->
+      <article class="card" id="text-tools">
+        <span class="tag">Transform</span>
+        <h3>Text Tools</h3>
+        <p>Remove duplicate lines, sort, add line numbers, find &amp; replace, or make lorem ipsum — live as you type.</p>
+        <div class="tool-ui">
+          <div class="tt-tabs" role="tablist" aria-label="Text tool mode">
+            <button class="tt-tab" type="button" role="tab" id="tt-tab-dedupe" data-mode="dedupe" aria-selected="true" aria-controls="tt-panel" tabindex="0">Remove duplicates</button>
+            <button class="tt-tab" type="button" role="tab" id="tt-tab-sort" data-mode="sort" aria-selected="false" aria-controls="tt-panel" tabindex="-1">Sort lines</button>
+            <button class="tt-tab" type="button" role="tab" id="tt-tab-lorem" data-mode="lorem" aria-selected="false" aria-controls="tt-panel" tabindex="-1">Lorem ipsum</button>
+            <button class="tt-tab" type="button" role="tab" id="tt-tab-clean" data-mode="clean" aria-selected="false" aria-controls="tt-panel" tabindex="-1">Clean spaces</button>
+            <button class="tt-tab" type="button" role="tab" id="tt-tab-number" data-mode="number" aria-selected="false" aria-controls="tt-panel" tabindex="-1">Line numbers</button>
+            <button class="tt-tab" type="button" role="tab" id="tt-tab-replace" data-mode="replace" aria-selected="false" aria-controls="tt-panel" tabindex="-1">Find &amp; replace</button>
+          </div>
+
+          <div id="tt-panel" role="tabpanel" aria-labelledby="tt-tab-dedupe">
+            <div class="tt-opts" data-for="dedupe">
+              <label class="tt-check"><input type="checkbox" id="tt-dd-case" /> Ignore case</label>
+              <label class="tt-check"><input type="checkbox" id="tt-dd-trim" checked /> Trim whitespace</label>
+            </div>
+
+            <div class="tt-field" data-for="sort" hidden>
+              <label for="tt-sort-order">Order</label>
+              <select id="tt-sort-order">
+                <option value="az">A → Z</option>
+                <option value="za">Z → A</option>
+                <option value="short">By length (shortest first)</option>
+                <option value="long">By length (longest first)</option>
+                <option value="reverse">Reverse order</option>
+                <option value="shuffle">Shuffle</option>
+              </select>
+              <div class="tt-opts"><label class="tt-check"><input type="checkbox" id="tt-sort-blank" /> Drop blank lines</label></div>
+            </div>
+
+            <div data-for="lorem" hidden>
+              <div class="tt-grid tt-field">
+                <div>
+                  <label for="tt-lo-count">How many</label>
+                  <input type="number" id="tt-lo-count" value="3" min="1" max="50" step="1" inputmode="numeric" />
+                </div>
+                <div>
+                  <label for="tt-lo-unit">Type</label>
+                  <select id="tt-lo-unit">
+                    <option value="paragraphs" selected>Paragraphs</option>
+                    <option value="sentences">Sentences</option>
+                    <option value="words">Words</option>
+                  </select>
+                </div>
+              </div>
+              <div class="tt-opts"><label class="tt-check"><input type="checkbox" id="tt-lo-start" checked /> Start with “Lorem ipsum dolor sit amet…”</label></div>
+            </div>
+
+            <div class="tt-field" data-for="clean" hidden>
+              <div class="tt-opts"><label class="tt-check"><input type="checkbox" id="tt-cl-space" checked /> Collapse extra spaces &amp; trim each line</label></div>
+              <label for="tt-cl-blank">Blank lines</label>
+              <select id="tt-cl-blank">
+                <option value="remove" selected>Remove all blank lines</option>
+                <option value="squash">Squash many into one</option>
+                <option value="keep">Leave as they are</option>
+              </select>
+            </div>
+
+            <div class="tt-field" data-for="number" hidden>
+              <div class="tt-grid">
+                <div>
+                  <label for="tt-nu-start">Start at</label>
+                  <input type="number" id="tt-nu-start" value="1" step="1" inputmode="numeric" />
+                </div>
+                <div>
+                  <label for="tt-nu-sep">After the number</label>
+                  <select id="tt-nu-sep">
+                    <option value=". ">1. text</option>
+                    <option value=") ">1) text</option>
+                    <option value=": ">1: text</option>
+                    <option value=" - ">1 - text</option>
+                    <option value="&#9;">1 [tab] text</option>
+                  </select>
+                </div>
+              </div>
+              <div class="tt-opts"><label class="tt-check"><input type="checkbox" id="tt-nu-skip" /> Skip blank lines</label></div>
+            </div>
+
+            <div class="tt-field" data-for="replace" hidden>
+              <div class="tt-grid">
+                <div>
+                  <label for="tt-fr-find">Find</label>
+                  <input type="text" id="tt-fr-find" autocomplete="off" spellcheck="false" />
+                </div>
+                <div>
+                  <label for="tt-fr-with">Replace with</label>
+                  <input type="text" id="tt-fr-with" autocomplete="off" spellcheck="false" />
+                </div>
+              </div>
+              <div class="tt-opts">
+                <label class="tt-check"><input type="checkbox" id="tt-fr-case" /> Match case</label>
+                <label class="tt-check"><input type="checkbox" id="tt-fr-word" /> Whole word</label>
+                <label class="tt-check"><input type="checkbox" id="tt-fr-regex" /> Regex</label>
+              </div>
+            </div>
+
+            <div id="tt-in-wrap">
+              <label for="tt-in">Your text <span style="text-transform:none;letter-spacing:0;font-weight:600">(one item per line)</span></label>
+              <textarea id="tt-in" placeholder="Paste or type here..." spellcheck="false"></textarea>
+            </div>
+
+            <label for="tt-out">Result</label>
+            <textarea id="tt-out" class="tt-out" readonly spellcheck="false" placeholder="Your result shows up here..."></textarea>
+            <div class="tt-btns">
+              <button class="tt-btn primary" type="button" id="tt-copy">📋 Copy</button>
+              <button class="tt-btn" type="button" id="tt-use" title="Move the result into the input box so you can chain tools">⤴ Use as input</button>
+              <button class="tt-btn" type="button" id="tt-shuffle" hidden>🔀 Shuffle again</button>
+              <button class="tt-btn" type="button" id="tt-regen" hidden>🎲 New text</button>
+              <button class="tt-btn" type="button" id="tt-clear">🗑 Clear</button>
+            </div>
+            <div class="result" id="tt-summary" aria-live="polite"><small>Summary</small>—</div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <!-- ================= ABOUT ================= -->
+  <section id="about" class="about reveal">
+    <div class="about-grid">
+      <div class="about-card"><span class="initials">TDA</span></div>
+      <div>
+        <span class="eyebrow">About this site</span>
+        <h2>Everyday tools, <span class="grad-text">zero friction.</span></h2>
+        <p>Built by THATdudeAGAIN'z — a maker with a love for strong type, punchy color, and tools that feel alive. Everything here runs 100% in your browser: nothing is uploaded, nothing is tracked, and it even works offline once the page loads.</p>
+        <div class="stats">
+          <div class="stat"><b class="grad-text">6</b><span>Tools live (more coming)</span></div>
+          <div class="stat"><b class="grad-text">0</b><span>Ads &amp; sign-ups</span></div>
+          <div class="stat"><b class="grad-text">100%</b><span>Free, in your browser</span></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -560,21 +830,24 @@
       </div>
       <button type="submit" class="btn btn-primary">Send message →</button>
       <div class="form-status" id="formStatus" role="status"></div>
-      <p class="form-note">Prefer email? <a href="mailto:jwclarkladymae@gmail.com" style="color:var(--cyan)">jwclarkladymae@gmail.com</a></p>
+      <p class="form-note">Prefer email? <a href="mailto:jwclarkladymae@gmail.com">jwclarkladymae@gmail.com</a></p>
     </form>
 
+    <div id="support" class="support-block">
     <p class="support-note">Everything here is free, forever. If a tool saved your day, you can
       <a href="https://ko-fi.com/thatdudeagainz" target="_blank" rel="noopener noreferrer">buy me a coffee ☕</a>
       or <a href="https://www.paypal.me/THATdudeAGAINz" target="_blank" rel="noopener noreferrer">tip via PayPal 💸</a>
       — it keeps new tools coming.</p>
+    <div class="cta-row support-btns">
+      <a href="https://ko-fi.com/thatdudeagainz" target="_blank" rel="noopener noreferrer" class="btn btn-kofi">☕ Fuel the tools</a>
+      <a href="https://www.paypal.me/THATdudeAGAINz" target="_blank" rel="noopener noreferrer" class="btn btn-paypal">💸 Tip via PayPal</a>
+    </div>
+    </div>
 
     <!-- EDIT ME: your links -->
-    <div class="socials" style="margin-top:2.5rem">
-      <a href="https://ko-fi.com/thatdudeagainz" target="_blank" rel="noopener noreferrer">☕ Ko-fi</a>
-      <a href="https://www.paypal.me/THATdudeAGAINz" target="_blank" rel="noopener noreferrer">💸 PayPal</a>
+    <div class="socials">
       <a href="https://github.com/tRollNhard/thatdudeagainz-tools" target="_blank" rel="noopener noreferrer">GitHub</a>
-      <a href="#">Twitter / X</a>
-      <a href="#">LinkedIn</a>
+      <!-- Add Twitter / X and LinkedIn back once you have real profile URLs (they were "#" placeholders) -->
     </div>
   </section>
 
@@ -614,19 +887,13 @@
       walk(document.querySelector('footer'));
     })();
 
-    // mobile nav toggle
-    document.querySelector('.nav-toggle').addEventListener('click', () => {
-      const ul = document.querySelector('nav ul');
-      ul.style.display = ul.style.display === 'flex' ? 'none' : 'flex';
-      ul.style.flexDirection = 'column';
-      ul.style.position = 'absolute';
-      ul.style.top = '4rem';
-      ul.style.right = '1.5rem';
-      ul.style.background = 'var(--surface)';
-      ul.style.padding = '1rem 1.5rem';
-      ul.style.borderRadius = '16px';
-      ul.style.border = '1px solid var(--ring)';
-    });
+    // mobile nav toggle (class-based, closes on link tap, Esc)
+    const navBtn = document.querySelector('.nav-toggle');
+    const navUl = document.getElementById('site-nav');
+    const setNav = open => { navUl.classList.toggle('open', open); navBtn.setAttribute('aria-expanded', String(open)); navBtn.textContent = open ? '✕' : '☰'; };
+    navBtn.addEventListener('click', () => setNav(!navUl.classList.contains('open')));
+    navUl.querySelectorAll('a').forEach(a => a.addEventListener('click', () => setNav(false)));
+    addEventListener('keydown', e => { if (e.key === 'Escape') setNav(false); });
 
     // reveal on scroll
     const io = new IntersectionObserver((entries) => {
@@ -891,6 +1158,221 @@
     });
     pwGenerate();
 
+
+    // ---------- TOOL 6: text tools ----------
+    (function () {
+      const $ = id => document.getElementById(id);
+      const tabs = [...document.querySelectorAll('.tt-tab')];
+      const panel = $('tt-panel');
+      const inEl = $('tt-in'), outEl = $('tt-out'), summary = $('tt-summary');
+      const inWrap = $('tt-in-wrap');
+      const shuffleBtn = $('tt-shuffle'), regenBtn = $('tt-regen');
+      let mode = 'dedupe';
+
+      const getLines = t => {
+        if (!t) return [];
+        const l = t.split(/\r?\n/);
+        if (l[l.length - 1] === '') l.pop(); // ignore one trailing newline
+        return l;
+      };
+      const n = (x, w) => `${x.toLocaleString('en-US')} ${w}${x === 1 ? '' : 's'}`;
+      const setSummary = msg => { summary.innerHTML = '<small>Summary</small>'; summary.appendChild(document.createTextNode(msg)); };
+
+      // ---- lorem ipsum ----
+      const LOREM_WORDS = ('lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua enim ad minim veniam quis nostrud exercitation ullamco laboris nisi aliquip ex ea commodo consequat duis aute irure in reprehenderit voluptate velit esse cillum fugiat nulla pariatur excepteur sint occaecat cupidatat non proident sunt culpa qui officia deserunt mollit anim id est laborum curabitur pretium tincidunt lacus vitae porta mauris vulputate nibh facilisis').split(' ');
+      const LOREM_START = 'lorem ipsum dolor sit amet consectetur adipiscing elit'.split(' ');
+      const rint = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
+      const rword = () => LOREM_WORDS[rint(0, LOREM_WORDS.length - 1)];
+      const cap = w => w.charAt(0).toUpperCase() + w.slice(1);
+      function loremSentence(first) {
+        let words;
+        if (first) {
+          words = LOREM_START.slice();
+          words[4] += ',';
+        } else {
+          const len = rint(6, 14);
+          words = [];
+          for (let i = 0; i < len; i++) words.push(rword());
+          if (len > 9) words[rint(3, len - 4)] += ',';
+        }
+        return cap(words.join(' ')) + '.';
+      }
+      function loremParagraph(first) {
+        const len = rint(3, 6), out = [];
+        for (let i = 0; i < len; i++) out.push(loremSentence(first && i === 0));
+        return out.join(' ');
+      }
+      const LOREM_MAX = { paragraphs: 50, sentences: 200, words: 2000 };
+      function loremGenerate() {
+        const unit = $('tt-lo-unit').value;
+        const max = LOREM_MAX[unit];
+        $('tt-lo-count').max = max;
+        let count = parseInt($('tt-lo-count').value, 10);
+        if (!isFinite(count) || count < 1) return null;
+        count = Math.min(count, max);
+        const start = $('tt-lo-start').checked;
+        if (unit === 'words') {
+          const w = [];
+          for (let i = 0; i < count; i++) w.push(start && i < LOREM_START.length ? LOREM_START[i] : rword());
+          return { text: w.join(' '), label: n(count, 'word') };
+        }
+        if (unit === 'sentences') {
+          const s = [];
+          for (let i = 0; i < count; i++) s.push(loremSentence(start && i === 0));
+          return { text: s.join(' '), label: n(count, 'sentence') };
+        }
+        const p = [];
+        for (let i = 0; i < count; i++) p.push(loremParagraph(start && i === 0));
+        return { text: p.join('\n\n'), label: n(count, 'paragraph') };
+      }
+
+      // ---- run current mode ----
+      function run() {
+        const text = inEl.value;
+        let out = '', msg = '—';
+        if (mode === 'lorem') {
+          const r = loremGenerate();
+          if (r) { out = r.text; msg = `${r.label} · ${n(r.text.trim().split(/\s+/).length, 'word')} total`; }
+          else msg = 'Enter a number of 1 or more';
+        } else if (mode === 'dedupe') {
+          const ic = $('tt-dd-case').checked, tr = $('tt-dd-trim').checked;
+          const lines = getLines(text), seen = new Set(), kept = [];
+          for (let l of lines) {
+            if (tr) l = l.trim();
+            const key = ic ? l.toLowerCase() : l;
+            if (!seen.has(key)) { seen.add(key); kept.push(l); }
+          }
+          out = kept.join('\n');
+          msg = lines.length ? `${n(lines.length, 'line')} in → ${n(kept.length, 'line')} out · ${n(lines.length - kept.length, 'duplicate')} removed` : '—';
+        } else if (mode === 'sort') {
+          const order = $('tt-sort-order').value;
+          let lines = getLines(text);
+          if ($('tt-sort-blank').checked) lines = lines.filter(l => l.trim() !== '');
+          const cmp = (a, b) => a.localeCompare(b, undefined, { sensitivity: 'base', numeric: true });
+          if (order === 'az') lines.sort(cmp);
+          else if (order === 'za') lines.sort((a, b) => cmp(b, a));
+          else if (order === 'short') lines.sort((a, b) => a.length - b.length || cmp(a, b));
+          else if (order === 'long') lines.sort((a, b) => b.length - a.length || cmp(a, b));
+          else if (order === 'reverse') lines.reverse();
+          else if (order === 'shuffle') {
+            for (let i = lines.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [lines[i], lines[j]] = [lines[j], lines[i]]; }
+          }
+          out = lines.join('\n');
+          msg = lines.length ? `${n(lines.length, 'line')} sorted` : '—';
+        } else if (mode === 'clean') {
+          const sp = $('tt-cl-space').checked, bl = $('tt-cl-blank').value;
+          let lines = getLines(text);
+          const before = lines.length;
+          if (sp) lines = lines.map(l => l.replace(/[ \t\u00a0]+/g, ' ').trim());
+          if (bl === 'remove') lines = lines.filter(l => l.trim() !== '');
+          else if (bl === 'squash') lines = lines.filter((l, i) => !(l.trim() === '' && i > 0 && lines[i - 1].trim() === ''));
+          out = lines.join('\n');
+          msg = before ? `${n(text.length, 'character')} → ${n(out.length, 'character')} · ${n(before, 'line')} → ${n(lines.length, 'line')}` : '—';
+        } else if (mode === 'number') {
+          let start = parseInt($('tt-nu-start').value, 10);
+          if (!isFinite(start)) start = 1;
+          const sep = $('tt-nu-sep').value, skip = $('tt-nu-skip').checked;
+          let k = start, numbered = 0;
+          out = getLines(text).map(l => {
+            if (skip && l.trim() === '') return l;
+            numbered++;
+            return (k++) + sep + l;
+          }).join('\n');
+          msg = numbered ? `${n(numbered, 'line')} numbered` : '—';
+        } else if (mode === 'replace') {
+          const find = $('tt-fr-find').value, repl = $('tt-fr-with').value;
+          if (!find) { out = text; msg = 'Type something in “Find” to start'; }
+          else {
+            try {
+              const useRe = $('tt-fr-regex').checked;
+              let src = useRe ? find : find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+              if ($('tt-fr-word').checked) src = '\\b(?:' + src + ')\\b';
+              const flags = 'g' + ($('tt-fr-case').checked ? '' : 'i') + 'm';
+              const re = new RegExp(src, flags);
+              let count = 0;
+              out = text.replace(re, (...m) => {
+                count++;
+                if (useRe) { // support $1, $&, $$ like normal JS replacement
+                  const groups = m.slice(1, m.findIndex(x => typeof x === 'number'));
+                  return repl.replace(/\$(\$|&|\d{1,2})/g, (_, t) => t === '$' ? '$' : t === '&' ? m[0] : (groups[+t - 1] ?? ''));
+                }
+                return repl;
+              });
+              msg = count ? `${n(count, 'replacement')} made` : 'No matches found';
+            } catch (err) {
+              out = text; msg = 'That regex isn’t valid yet — check the pattern';
+            }
+          }
+        }
+        outEl.value = out;
+        setSummary(msg);
+      }
+
+      function setMode(next, focus) {
+        mode = next;
+        tabs.forEach(t => {
+          const on = t.dataset.mode === mode;
+          t.setAttribute('aria-selected', String(on));
+          t.tabIndex = on ? 0 : -1;
+          if (on) { panel.setAttribute('aria-labelledby', t.id); if (focus) t.focus(); }
+        });
+        panel.querySelectorAll('[data-for]').forEach(el => { el.hidden = el.dataset.for !== mode; });
+        inWrap.hidden = mode === 'lorem';
+        shuffleBtn.hidden = !(mode === 'sort' && $('tt-sort-order').value === 'shuffle');
+        regenBtn.hidden = mode !== 'lorem';
+        $('tt-use').hidden = mode === 'lorem';
+        run();
+      }
+
+      tabs.forEach((t, i) => {
+        t.addEventListener('click', () => setMode(t.dataset.mode));
+        t.addEventListener('keydown', e => {
+          const k = e.key;
+          const to = k === 'ArrowRight' || k === 'ArrowDown' ? (i + 1) % tabs.length
+                   : k === 'ArrowLeft' || k === 'ArrowUp' ? (i - 1 + tabs.length) % tabs.length
+                   : k === 'Home' ? 0 : k === 'End' ? tabs.length - 1 : -1;
+          if (to < 0) return;
+          e.preventDefault();
+          setMode(tabs[to].dataset.mode, true);
+        });
+      });
+
+      inEl.addEventListener('input', run);
+      panel.querySelectorAll('[data-for] input, [data-for] select').forEach(el => {
+        el.addEventListener('input', run);
+        el.addEventListener('change', run);
+      });
+      $('tt-sort-order').addEventListener('change', () => { shuffleBtn.hidden = $('tt-sort-order').value !== 'shuffle'; });
+      shuffleBtn.addEventListener('click', run);
+      regenBtn.addEventListener('click', run);
+
+      $('tt-use').addEventListener('click', () => {
+        if (!outEl.value) return;
+        inEl.value = outEl.value;
+        run();
+      });
+      $('tt-clear').addEventListener('click', () => {
+        inEl.value = ''; outEl.value = '';
+        if (mode === 'replace') { $('tt-fr-find').value = ''; $('tt-fr-with').value = ''; }
+        if (mode === 'lorem') setSummary('Cleared — press “New text” to make more');
+        else run();
+        (mode === 'lorem' ? regenBtn : inEl).focus();
+      });
+      $('tt-copy').addEventListener('click', async (e) => {
+        if (!outEl.value) return;
+        const btn = e.currentTarget;
+        try {
+          await navigator.clipboard.writeText(outEl.value);
+          btn.textContent = '✅ Copied!';
+        } catch {
+          outEl.select(); document.execCommand('copy');
+          btn.textContent = '✅ Copied!';
+        }
+        setTimeout(() => { btn.textContent = '📋 Copy'; }, 1500);
+      });
+      setMode('dedupe');
+    })();
+
     // ---------- contact form ----------
     const form = document.getElementById('contactForm');
     const status = document.getElementById('formStatus');
@@ -910,7 +1392,7 @@
         // Zero-setup: open the guest's email app pre-filled to you.
         e.preventDefault();
         const to = form.dataset.email;
-        const subject = encodeURIComponent(`Portfolio message from ${name}`);
+        const subject = encodeURIComponent(`Tool request from ${name}`);
         const body = encodeURIComponent(`${message}\n\n— ${name} (${email})`);
         window.location.href = `mailto:${to}?subject=${subject}&body=${body}`;
         showStatus("Opening your email app… if nothing happens, email me directly.", true);
